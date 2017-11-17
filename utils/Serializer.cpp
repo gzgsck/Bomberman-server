@@ -71,7 +71,7 @@ string cellSerializer(Cell* cell){
     json_spirit::Object addr_obj;
     addr_obj.push_back(json_spirit::Pair("center", pointSerializer(cell->center)));
 
-    return write(addr_obj, json_spirit::none);
+    return write(addr_obj, json_spirit::raw_utf8);
 }
 
 string playerSerializer(Player* player){
@@ -95,7 +95,7 @@ string playerSerializer(Player* player){
     string str1 = write( val, json_spirit::single_line_arrays);
     addr_obj.push_back( json_spirit::Pair( "bombs", str1 ) );
 
-    return write(addr_obj, json_spirit::none);
+    return write(addr_obj, json_spirit::raw_utf8);
 }
 
 string obstacleSerializer(vector<Obstacle*> mapObstacles){
