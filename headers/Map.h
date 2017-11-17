@@ -14,7 +14,7 @@ class Bomb;
 
 class Map {
 
-private:
+public:
     vector<Player*> players;
     vector<Obstacle*> obstacles;
     vector<Bomb*> bombs;

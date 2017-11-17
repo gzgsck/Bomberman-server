@@ -11,7 +11,7 @@ class Player;
 
 class Bomb {
 
-private:
+public:
     Cell* position;
     Player* owner;
     int power;
