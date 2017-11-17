@@ -12,7 +12,7 @@ class Bomb;
 
 class Player {
 
-private:
+public:
     Point* position;
     int score;
     string name;

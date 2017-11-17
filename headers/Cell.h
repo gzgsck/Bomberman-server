@@ -9,7 +9,7 @@ class Point;
 
 class Cell {
 
-private:
+public:
     Point* center;
 };
 
