@@ -44,13 +44,13 @@ string serializeToJson(Map* map){
 
     addr_obj.push_back( json_spirit::Pair( "obstacles", str3 ) );
 
-    string str = json_spirit::write( addr_obj, json_spirit::pretty_print | json_spirit::raw_utf8  );
+    string str = json_spirit::write( addr_obj, json_spirit::raw_utf8  );
 
     boost::erase_all(str, "\\");
 
     return str;
 }
-
+//todo add owner to serialize
 string bombSerializer(Bomb* bomb){
     json_spirit::Object addr_obj;
     addr_obj.push_back(json_spirit::Pair("power", bomb->power));
