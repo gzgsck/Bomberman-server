@@ -77,5 +77,23 @@ string playerSerializer(Player* player){
     addr_obj.push_back(json_spirit::Pair("lifes", player->lifes));
     addr_obj.push_back(json_spirit::Pair("isAlive", player->isAlive));
     addr_obj.push_back(json_spirit::Pair("avaliableBombs", player->avaliableBombs));
+    addr_obj.push_back(json_spirit::Pair("position", pointSerializer(player->position)));
+
+    vector<string> bombs;
+    for(int i =0 ; i< player->bombs.size(); i++) {
+        json_spirit::Object temp;
+        temp.push_back(json_spirit::Pair("bomb", bombSerializer(player->bombs.at(i))));
+        string str = write(temp, json_spirit::raw_utf8);
+        bombs.push_back(str);
+    }
+
+    json_spirit::Value val( bombs.begin(), bombs.end());
+    string str1 = write( val, json_spirit::single_line_arrays);
+    addr_obj.push_back( json_spirit::Pair( "bombs", str1 ) );
+
     return write(addr_obj, json_spirit::none);
+}
+
+string obstacleSerializer(DestroyableObstacle obstacle){
+
 }

@@ -7,6 +7,8 @@
 
 #include <iostream>
 #include "../headers/Map.h"
+#include "../headers/DestroyableObstacle.h"
+#include "../headers/UndestroyableObstacle.h"
 
 using namespace std;
 
@@ -15,5 +17,7 @@ string bombSerializer(Bomb* bomb);
 string pointSerializer(Point* point);
 string cellSerializer(Cell* cell);
 string playerSerializer(Player* player);
+string obstacleSerializer(DestroyableObstacle* obstacle);
+string obstacleSerializer(UndestroyableObstacle obstacle);
 
 #endif //PROJECTBOOM_SERIALIZER_H
