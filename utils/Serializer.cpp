@@ -112,7 +112,6 @@ string obstacleSerializer(vector<Obstacle*> mapObstacles){
     }
 
     json_spirit::Value val2( obstacles.begin(), obstacles.end());
-    string str3 = write( val2, json_spirit::single_line_arrays);
-    return str3;
+    return write( val2, json_spirit::single_line_arrays);
 
 }
