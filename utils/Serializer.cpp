@@ -40,6 +40,10 @@ string serializeToJson(Map* map){
     string str2 = write( val1, json_spirit::single_line_arrays);
     addr_obj.push_back( json_spirit::Pair( "players", str2 ) );
 
+    string str3 = obstacleSerializer(map->obstacles);
+
+    addr_obj.push_back( json_spirit::Pair( "obstacles", str3 ) );
+
     string str = json_spirit::write( addr_obj, json_spirit::pretty_print | json_spirit::raw_utf8  );
 
     boost::erase_all(str, "\\");
@@ -94,6 +98,21 @@ string playerSerializer(Player* player){
     return write(addr_obj, json_spirit::none);
 }
 
-string obstacleSerializer(DestroyableObstacle obstacle){
+string obstacleSerializer(vector<Obstacle*> mapObstacles){
+    vector<string> obstacles;
+    for(int i = 0 ; i< mapObstacles.size(); i++) {
+        json_spirit::Object temp2;
+        if(mapObstacles.at(i)->isDestroyable()){
+        temp2.push_back(json_spirit::Pair("destroyableObstacles", cellSerializer(mapObstacles.at(i)->position)));}
+        else{
+            temp2.push_back(json_spirit::Pair("undestroyableObstacle", cellSerializer(mapObstacles.at(i)->position)));}
+
+        string str = write(temp2, json_spirit::raw_utf8);
+        obstacles.push_back(str);
+    }
+
+    json_spirit::Value val2( obstacles.begin(), obstacles.end());
+    string str3 = write( val2, json_spirit::single_line_arrays);
+    return str3;
 
 }

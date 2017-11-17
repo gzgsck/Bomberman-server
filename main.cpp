@@ -39,6 +39,17 @@ int main() {
     player->name = "jan";
     player->score = 8;
 
+    Obstacle* o1 = new DestroyableObstacle();
+    Obstacle* o2 = new UndestroyableObstacle();
+    o1->position = cell;
+    o2->position = cell;
+
+    vector<Obstacle*> obstacles;
+    m->obstacles.push_back(o1);
+    m->obstacles.push_back(o2);
+    m->obstacles.push_back(o1);
+
+
     m->players.push_back(player);
     m->players.push_back(player);
 

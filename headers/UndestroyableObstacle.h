@@ -5,8 +5,9 @@
 
 using namespace std;
 
-class UndestroyableObstacle: Obstacle {
-
+class UndestroyableObstacle: public Obstacle {
+public:
+    bool isDestroyable();
 };
 
 

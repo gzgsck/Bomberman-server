@@ -3,3 +3,7 @@
 //
 
 #include "../headers/DestroyableObstacle.h"
+
+bool DestroyableObstacle::isDestroyable() {
+    return true;
+}

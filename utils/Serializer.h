@@ -17,7 +17,6 @@ string bombSerializer(Bomb* bomb);
 string pointSerializer(Point* point);
 string cellSerializer(Cell* cell);
 string playerSerializer(Player* player);
-string obstacleSerializer(DestroyableObstacle* obstacle);
-string obstacleSerializer(UndestroyableObstacle obstacle);
+string obstacleSerializer(vector<Obstacle*> obstacle);
 
 #endif //PROJECTBOOM_SERIALIZER_H

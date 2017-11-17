@@ -8,6 +8,7 @@ using namespace std;
 class Obstacle {
 public:
     Cell* position;
+    virtual bool isDestroyable() = 0;
 };
 
 
