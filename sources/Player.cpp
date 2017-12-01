@@ -3,3 +3,7 @@
 //
 
 #include "../headers/Player.h"
+
+Player::Player() {
+    this->position = new Point();
+}

@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "Obstacle.h"
 #include "Bomb.h"
+#include "Cell.h"
 
 using namespace std;
 
@@ -16,8 +17,7 @@ class Map {
 
 public:
     vector<Player*> players;
-    vector<Obstacle*> obstacles;
-    vector<Bomb*> bombs;
+    vector<Cell*> cells;
     int mapSize;
 };
 

@@ -12,8 +12,6 @@ class Player;
 class Bomb {
 
 public:
-    Cell* position;
-    Player* owner;
     int power;
     int durationTime;
 

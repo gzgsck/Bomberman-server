@@ -2,58 +2,42 @@
 #include <fstream>
 #include "headers/Map.h"
 #include "utils/Serializer.h"
+#include "utils/ServerUDP.h"
 
 
 using namespace std;
 
+
 int main() {
     Map* m = new Map();
-    m->mapSize = 10;
+    m->mapSize = 50;
 
-    vector<Bomb*> bombs;
-    Bomb* bomb = new Bomb();
-    bomb->durationTime = 18;
-    bomb->power = 1;
-    bombs.push_back(bomb);
-    Bomb* bomb1 = new Bomb();
-    bomb1->durationTime = 12;
-    bomb1->power = 1;
-    bombs.push_back(bomb1);
+    for(int i =0 ; i< m->mapSize ; i++) {
+        Cell *cell = new Cell();
 
-    Cell* cell = new Cell();
+        if(i % 3 == 0) {
+            cell->obstacle =  new DestroyableObstacle();
+            cell->bomb = new Bomb();
+            cell->bomb->durationTime = 100;
+            cell->bomb->power = 8;
+        }
+        if(i % 3 == 1) {cell->obstacle = new UndestroyableObstacle();}
+        m->cells.push_back(cell);
+    }
 
-    Point* point = new Point();
-    point->x = 1;
-    point->y = 2;
-    cell->center = point;
-    bomb->position = cell;
-    bomb1->position = cell;
-    m->bombs = bombs;
-
-    Player* player = new Player();
-    player->position = point;
-    player->bombs = bombs;
-    player->avaliableBombs = 2;
-    player->isAlive = true;
-    player->lifes = 3;
-    player->name = "jan";
-    player->score = 8;
-
-    Obstacle* o1 = new DestroyableObstacle();
-    Obstacle* o2 = new UndestroyableObstacle();
-    o1->position = cell;
-    o2->position = cell;
-
-    vector<Obstacle*> obstacles;
-    m->obstacles.push_back(o1);
-    m->obstacles.push_back(o2);
-    m->obstacles.push_back(o1);
+    for(int i = 0 ; i< 5; i++){
+        Player* p = new Player();
+        p->position->x = 12;
+        p->position->y = 55;
+        p->name = "okok";
+        p->avaliableBombs = 3;
+        p->isAlive = true;
+        p->lifes = 12;
+        m->players.push_back(p);
+    }
 
 
-    m->players.push_back(player);
-    m->players.push_back(player);
 
-
-    cout<<serializeToJson(m);
+    connection(m);
     return 0;
 }

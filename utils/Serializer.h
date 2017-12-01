@@ -12,11 +12,8 @@
 
 using namespace std;
 
-string serializeToJson(Map* map);
-string bombSerializer(Bomb* bomb);
-string pointSerializer(Point* point);
-string cellSerializer(Cell* cell);
-string playerSerializer(Player* player);
-string obstacleSerializer(vector<Obstacle*> obstacle);
+string serializeObstacles(Map* map);
+string serializeBombs(Map* map);
+string serializePlayers(Map* map);
 
 #endif //PROJECTBOOM_SERIALIZER_H

@@ -14,12 +14,11 @@ class Player {
 
 public:
     Point* position;
-    int score;
     string name;
     int avaliableBombs;
-    vector<Bomb*> bombs;
     int lifes;
     bool isAlive;
+    Player();
 
 };
 
