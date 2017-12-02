@@ -5,20 +5,21 @@ using namespace std;
 
 string serializeObstacles(Map* map){
     string obstacles = "o:";
-    obstacles.append(to_string(map->cells.size()));
+    obstacles.append(to_string(MAP_SIZE * MAP_SIZE));
     obstacles.append("|");
-    for(int i = 0; i < map->cells.size() ; i++){
-        if(map->cells.at(i)->obstacle == nullptr){
-            obstacles.append("0");
-            continue;
-        }
-        if(map->cells.at(i)->obstacle->isDestroyable()){
-            obstacles.append("1");
-            continue;
-        }
-        else{
-            obstacles.append("2");
-            continue;
+    for(int i = 0; i < MAP_SIZE ; i++) {
+        for (int k = 0; k < MAP_SIZE; k++) {
+            if (map->cells[i][k]->obstacle == nullptr) {
+                obstacles.append("0");
+                continue;
+            }
+            if (map->cells[i][k]->obstacle->isDestroyable()) {
+                obstacles.append("1");
+                continue;
+            } else {
+                obstacles.append("2");
+                continue;
+            }
         }
     }
     obstacles.append("+++");
@@ -52,15 +53,17 @@ string serializePlayers(Map* map){
 string serializeBombs(Map* map){
     int bombsQuantity = 0;
     string bombs = "";
-    for(int i = 0; i < map->cells.size() ; i++){
-        if(map->cells.at(i)->bomb != nullptr){
-            bombsQuantity ++;
-            bombs.append(to_string(i));
-            bombs.append(",");
-            bombs.append(to_string(map->cells.at(i)->bomb->power));
-            bombs.append(",");
-            bombs.append(to_string(map->cells.at(i)->bomb->durationTime));
-            bombs.append("|");
+    for(int i = 0; i < MAP_SIZE ; i++) {
+        for (int k = 0; k < MAP_SIZE; k++) {
+            if (map->cells[i][k]->bomb != nullptr) {
+                bombsQuantity++;
+                bombs.append(to_string(i*MAP_SIZE + k));
+                bombs.append(",");
+                bombs.append(to_string(map->cells[i][k]->bomb->power));
+                bombs.append(",");
+                bombs.append(to_string(map->cells[i][k]->bomb->durationTime));
+                bombs.append("|");
+            }
         }
     }
     string returnedValue = "";

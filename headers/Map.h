@@ -6,6 +6,7 @@
 #include "Obstacle.h"
 #include "Bomb.h"
 #include "Cell.h"
+#include "../utils/Configuration.h"
 
 using namespace std;
 
@@ -17,8 +18,7 @@ class Map {
 
 public:
     vector<Player*> players;
-    vector<Cell*> cells;
-    int mapSize;
+    Cell* cells[MAP_SIZE][MAP_SIZE];
 };
 
 

@@ -4,6 +4,7 @@
 
 #include "ServerUDP.h"
 #include "Serializer.h"
+#include "Configuration.h"
 
 
 ssize_t sendto(int i, char string[50], int i1, int i2);

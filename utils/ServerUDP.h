@@ -20,9 +20,6 @@
 #include <time.h>
 #include "../headers/Map.h"
 
-#define SERVER_PORT 1234
-#define QUEUE_SIZE 5
-
 
 int connection(Map* map);
 #endif //PROJECTBOOM_SERVERUDP_H
