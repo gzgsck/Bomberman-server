@@ -4,15 +4,21 @@
 
 #include "ServerUDP.h"
 #include "Serializer.h"
+#include "Deserializer.h"
 #include "Configuration.h"
 
 
 ssize_t sendto(int i, char string[50], int i1, int i2);
+void sendBombs(int socket, Map* map, sockaddr_in addr);
+void sendPlayers(int socket, Map* map, sockaddr_in client);
+void sendObstacles(int socket, Map* map, sockaddr_in client);
+void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]);
+string deserializeProbeRequest(char tab[]);
 
 int connection(Map* map )
 {
     int nSocket;
-    int nBind, nListen;
+    int nBind;
     int nFoo = 1;
     socklen_t nTmp;
     struct sockaddr_in stAddr, stClientAddr;
@@ -48,23 +54,62 @@ int connection(Map* map )
         int n = 500;
         char buffer[n];
         recvfrom(nSocket, buffer, n, 0,(struct sockaddr*)&stClientAddr, &nTmp);
+        if(buffer[0] == 'p' && buffer[1] == 'r'){
+            //probe request
+            probeRequest(nSocket, map, stClientAddr, buffer);
+        }
 
 
 
 
-        string s = serializeObstacles(map);
-        strcpy(buffer, s.c_str());
-        sendto(nSocket, buffer, n, 0,(struct sockaddr*)&stClientAddr, sizeof(stClientAddr));
+//        sendBombs(nSocket, map, stClientAddr);
+//        sendPlayers(nSocket, map, stClientAddr);
+//        sendObstacles(nSocket, map, stClientAddr);
 
-        string o = serializeBombs(map);
-        strcpy(buffer, o.c_str());
-        sendto(nSocket, buffer, n, 0,(struct sockaddr*)&stClientAddr, sizeof(stClientAddr));
 
-        string p = serializePlayers(map);
-        strcpy(buffer, p.c_str());
-        sendto(nSocket, buffer, n, 0,(struct sockaddr*)&stClientAddr, sizeof(stClientAddr));
     }
 
+}
+
+void sendBombs(int socket, Map* map, sockaddr_in clientAddr){
+    string o = serializeBombs(map);
+    char buffer[o.length()];
+    strcpy(buffer, o.c_str());
+    sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+}
+
+void sendObstacles(int socket, Map* map, sockaddr_in clientAddr){
+    string o = serializeObstacles(map);
+    char buffer[o.length()];
+    strcpy(buffer, o.c_str());
+    sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+}
+
+void sendPlayers(int socket, Map* map, sockaddr_in clientAddr){
+    string o = serializePlayers(map);
+    char buffer[o.length()];
+    strcpy(buffer, o.c_str());
+    sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+}
+
+void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]){
+    string name = deserializeProbeRequest(tab);
+    string o;
+    if(!map->checkIsOnPlayersList(name)){
+        if(!map->addPlayersNameToList(name)){
+            o = "pr:-2";
+        };
+    }
+    if(!map->checkAllPlayersHaveName()){
+        o = "pr:-1";
+    }
+    else{
+        o = serializeToTableOfPlayers(map);
+    }
+
+    char buffer[o.length()];
+    strcpy(buffer, o.c_str());
+    sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
 }
 
 

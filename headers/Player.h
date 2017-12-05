@@ -14,11 +14,14 @@ class Player {
 
 public:
     Point* position;
+    int id;
     string name;
     int avaliableBombs;
     int lifes;
     bool isAlive;
     Player();
+    vector<Bomb*> bombs;
+    int lastResponseTime;
 
 };
 

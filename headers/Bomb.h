@@ -12,9 +12,11 @@ class Player;
 class Bomb {
 
 public:
+    Player* owner;
     int power;
     int durationTime;
-
+    int timestamp;
+    Bomb(Player* owner, int power);
 };
 
 

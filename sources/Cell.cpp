@@ -3,3 +3,7 @@
 //
 
 #include "../headers/Cell.h"
+
+Cell::Cell(Point* point) {
+    center = point;
+}

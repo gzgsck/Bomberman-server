@@ -14,6 +14,7 @@ using namespace std;
 Map* generateMap();
 Map* generateCells(Map* map);
 Map* generateObstacles(Map* map);
+Map* generatePlayers(Map* map);
 
 
 

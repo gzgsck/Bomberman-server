@@ -29,20 +29,21 @@ string serializeObstacles(Map* map){
 string serializePlayers(Map* map){
     string players = "p:";
     players.append(to_string(map->players.size()));
+    players.append("|");
     for(int i = 0; i< map->players.size(); i++){
         Player* p = map->players.at(i);
-        players.append(p->name);
+        players.append(to_string(p->id));
         players.append(",");
         players.append(to_string(p->lifes));
         players.append(",");
         players.append(to_string(p->isAlive));
         players.append(",");
         players.append(to_string(p->avaliableBombs));
-        players.append("{");
+        players.append(",");
         players.append(to_string(p->position->x));
         players.append(",");
         players.append(to_string(p->position->y));
-        players.append("}|");
+        players.append("|");
 
     }
 
@@ -62,6 +63,8 @@ string serializeBombs(Map* map){
                 bombs.append(to_string(map->cells[i][k]->bomb->power));
                 bombs.append(",");
                 bombs.append(to_string(map->cells[i][k]->bomb->durationTime));
+                bombs.append(",");
+                bombs.append(to_string(map->cells[i][k]->bomb->timestamp));
                 bombs.append("|");
             }
         }
@@ -75,3 +78,24 @@ string serializeBombs(Map* map){
     return returnedValue;
 
 }
+string serializeToTableOfPlayers(Map* map){
+    string players = "p:";
+    players.append(to_string(map->players.size()));
+    for(int i = 0; i< map->players.size(); i++){
+        players.append("|");
+        Player* p = map->players.at(i);
+        players.append(to_string(p->id));
+        players.append(",");
+        players.append(p->name);
+
+    }
+    players.append("+++");
+    return players;
+}
+
+// todo deserialize
+// move x,y
+// bomba x,y
+// ping
+// tablica gracz - struktura z ip, czas aktywnosci
+// w 1 forze

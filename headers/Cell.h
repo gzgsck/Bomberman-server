@@ -17,6 +17,7 @@ public:
     Point* center;
     Obstacle* obstacle;
     Bomb* bomb;
+    Cell(Point* point);
 };
 
 

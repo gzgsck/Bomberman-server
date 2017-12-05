@@ -15,5 +15,6 @@ using namespace std;
 string serializeObstacles(Map* map);
 string serializeBombs(Map* map);
 string serializePlayers(Map* map);
+string serializeToTableOfPlayers(Map* map);
 
 #endif //PROJECTBOOM_SERIALIZER_H
