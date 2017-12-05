@@ -21,7 +21,7 @@ public:
     Cell* cells[MAP_SIZE][MAP_SIZE];
     bool checkAllPlayersHaveName();
     bool checkIsOnPlayersList(string name);
-    bool addPlayersNameToList(string name);
+    bool addPlayersNameToList(string name, sockaddr_in* sock);
 };
 
 

@@ -14,6 +14,7 @@ void sendPlayers(int socket, Map* map, sockaddr_in client);
 void sendObstacles(int socket, Map* map, sockaddr_in client);
 void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]);
 string deserializeProbeRequest(char tab[]);
+void sendMapForAllPlayers(int socket, Map* map);
 
 int connection(Map* map )
 {
@@ -57,6 +58,18 @@ int connection(Map* map )
         if(buffer[0] == 'p' && buffer[1] == 'r'){
             //probe request
             probeRequest(nSocket, map, stClientAddr, buffer);
+
+
+
+
+
+            if(map->checkAllPlayersHaveName()) {
+                sendMapForAllPlayers(nSocket, map);
+            }
+        }
+        //todo odpowiedzi gracza
+        if(buffer[0] == 'a' && buffer[1] == 'b'){
+
         }
 
 
@@ -96,20 +109,40 @@ void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]){
     string name = deserializeProbeRequest(tab);
     string o;
     if(!map->checkIsOnPlayersList(name)){
-        if(!map->addPlayersNameToList(name)){
+        if(!map->addPlayersNameToList(name, &clientAddr)){
+            cout<<"okok"<<endl;
             o = "pr:-2";
+            char buffer[o.length()];
+            strcpy(buffer, o.c_str());
+            sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+            return;
         };
     }
     if(!map->checkAllPlayersHaveName()){
         o = "pr:-1";
+        char buffer[o.length()];
+        strcpy(buffer, o.c_str());
+        sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+        return;
     }
     else{
         o = serializeToTableOfPlayers(map);
+        char buffer[o.length()];
+        strcpy(buffer, o.c_str());
+        sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+        return;
     }
+}
 
-    char buffer[o.length()];
-    strcpy(buffer, o.c_str());
-    sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+
+
+// different thread
+void sendMapForAllPlayers(int socket, Map* map){
+    for(int i = 0 ; i< map->players.size(); i++){
+        sendPlayers(socket, map, *map->players.at(i)->socket);
+        sendObstacles(socket, map, *map->players.at(i)->socket);
+        sendBombs(socket, map, *map->players.at(i)->socket);
+    }
 }
 
 

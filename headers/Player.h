@@ -2,6 +2,7 @@
 #define PROJECTBOOM_PLAYER_H
 #include <iostream>
 #include <vector>
+#include <netinet/in.h>
 #include "Point.h"
 #include "Bomb.h"
 
@@ -22,6 +23,7 @@ public:
     Player();
     vector<Bomb*> bombs;
     int lastResponseTime;
+    sockaddr_in* socket;
 
 };
 
