@@ -10,4 +10,5 @@ Player::Player() {
     this->lifes = PLAYERS_START_LIFES_QUANTITY;
     this->isAlive = true;
     this->position = new Point();
+    this->isActive = true;
 }

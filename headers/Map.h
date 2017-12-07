@@ -22,6 +22,9 @@ public:
     bool checkAllPlayersHaveName();
     bool checkIsOnPlayersList(string name);
     bool addPlayersNameToList(string name, sockaddr_in* sock);
+    bool checkPlayerRequests(string name);
+    void setPlayerTimeResponse(sockaddr_in* sock);
+    Player* findPlayerBySocaddr(sockaddr_in* sock);
 };
 
 

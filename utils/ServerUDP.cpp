@@ -16,6 +16,7 @@ void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]);
 string deserializeProbeRequest(char tab[]);
 void sendMapForAllPlayers(int socket, Map* map);
 
+
 int connection(Map* map )
 {
     int nSocket;
@@ -40,6 +41,12 @@ int connection(Map* map )
     }
 
     setsockopt(nSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&nFoo, sizeof(nFoo));
+
+    //non blocking
+//    struct timeval read_timeout;
+//    read_timeout.tv_sec = 0;
+//    read_timeout.tv_usec = 10;
+//    setsockopt(nSocket, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
     /* bind a name to a socket */
     nBind = bind(nSocket, (struct sockaddr*)&stAddr, sizeof(struct sockaddr));
     if (nBind < 0)
@@ -57,20 +64,27 @@ int connection(Map* map )
         recvfrom(nSocket, buffer, n, 0,(struct sockaddr*)&stClientAddr, &nTmp);
         if(buffer[0] == 'p' && buffer[1] == 'r'){
             //probe request
+            //pthread_t t;
+            //pthread_create(&t, NULL, call_thread, NULL);
             probeRequest(nSocket, map, stClientAddr, buffer);
 
 
 
+            }
+        if(buffer[0] == 'p' && buffer[1] == 'i') {
+            map->setPlayerTimeResponse(&stClientAddr);
+        }
 
-
-            if(map->checkAllPlayersHaveName()) {
+        if(map->checkAllPlayersHaveName()) {
+           // if(buffer[0] == 'a' && buffer[1] == 'b'){
+                //todo odpowiedzi gracza
                 sendMapForAllPlayers(nSocket, map);
+            //}
+            for(int i = 0 ; i < map->players.size(); i++){
+                cout<<map->players.at(i)->socket->sin_addr.s_addr<< endl;
             }
         }
-        //todo odpowiedzi gracza
-        if(buffer[0] == 'a' && buffer[1] == 'b'){
 
-        }
 
 
 
@@ -89,6 +103,7 @@ void sendBombs(int socket, Map* map, sockaddr_in clientAddr){
     char buffer[o.length()];
     strcpy(buffer, o.c_str());
     sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+    return;
 }
 
 void sendObstacles(int socket, Map* map, sockaddr_in clientAddr){
@@ -96,6 +111,7 @@ void sendObstacles(int socket, Map* map, sockaddr_in clientAddr){
     char buffer[o.length()];
     strcpy(buffer, o.c_str());
     sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+    return;
 }
 
 void sendPlayers(int socket, Map* map, sockaddr_in clientAddr){
@@ -103,6 +119,7 @@ void sendPlayers(int socket, Map* map, sockaddr_in clientAddr){
     char buffer[o.length()];
     strcpy(buffer, o.c_str());
     sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+    return;
 }
 
 void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]){
@@ -110,7 +127,6 @@ void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]){
     string o;
     if(!map->checkIsOnPlayersList(name)){
         if(!map->addPlayersNameToList(name, &clientAddr)){
-            cout<<"okok"<<endl;
             o = "pr:-2";
             char buffer[o.length()];
             strcpy(buffer, o.c_str());
@@ -145,5 +161,11 @@ void sendMapForAllPlayers(int socket, Map* map){
     }
 }
 
-
+void sendPong(int socket, sockaddr_in clientAddr){
+    string o = "ok";
+    char buffer[o.length()];
+    strcpy(buffer, o.c_str());
+    sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+    return;
+}
 

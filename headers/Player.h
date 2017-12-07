@@ -16,10 +16,11 @@ class Player {
 public:
     Point* position;
     int id;
-    string name;
+    string name = "";
     int avaliableBombs;
     int lifes;
     bool isAlive;
+    bool isActive;
     Player();
     vector<Bomb*> bombs;
     int lastResponseTime;

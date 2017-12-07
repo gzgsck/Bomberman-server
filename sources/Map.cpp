@@ -3,12 +3,13 @@
 //
 
 #include <netinet/in.h>
+#include <chrono>
 #include "../headers/Map.h"
 
 
 bool Map::checkAllPlayersHaveName(){
     for(int i = 0 ; i < this->players.size(); i++){
-        if(!(this->players.at(i)->name.size()>0)){
+        if((this->players.at(i)->name.compare("") == 0 )){
             return false;
         }
     }
@@ -20,8 +21,8 @@ bool Map::checkIsOnPlayersList(string name){
         if(this->players.at(i)->name.compare(name) == 0){
             return true;
         }
-        return false;
     }
+    return false;
 }
 
 bool Map::addPlayersNameToList(string name, sockaddr_in* sock){
@@ -32,7 +33,27 @@ bool Map::addPlayersNameToList(string name, sockaddr_in* sock){
         if(this->players.at(i)->name.size()<1){
             this->players.at(i)->name = name;
             this->players.at(i)->socket = sock;
+            cout<< sock->sin_addr.s_addr<<endl;
             return true;
         }
     }
+}
+
+void Map::setPlayerTimeResponse(sockaddr_in* sock){
+    Player* p = findPlayerBySocaddr(sock);
+    cout<<p->socket->sin_addr.s_addr<<endl;
+    if(p != nullptr) {
+        p->lastResponseTime = chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+    }
+}
+
+Player* Map::findPlayerBySocaddr(sockaddr_in* sock){
+    for(int i = 0 ; i < this->players.size(); i++){
+        cout<<players.at(i)->socket->sin_addr.s_addr<<" "<<sock->sin_addr.s_addr<<endl;
+        if(this-> players.at(i)->socket != nullptr && this->players.at(i)->socket->sin_addr.s_addr == sock->sin_addr.s_addr){
+            return this->players.at(i);
+        }
+    }
+    return nullptr ;
 }
