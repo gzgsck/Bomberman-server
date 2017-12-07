@@ -32,8 +32,7 @@ bool Map::addPlayersNameToList(string name, sockaddr_in* sock){
     for(int i = 0; i < this->players.size(); i++){
         if(this->players.at(i)->name.size()<1){
             this->players.at(i)->name = name;
-            this->players.at(i)->socket = sock;
-            cout<< sock->sin_addr.s_addr<<endl;
+            this->players.at(i)->setSocket(sock);
             return true;
         }
     }
@@ -41,7 +40,6 @@ bool Map::addPlayersNameToList(string name, sockaddr_in* sock){
 
 void Map::setPlayerTimeResponse(sockaddr_in* sock){
     Player* p = findPlayerBySocaddr(sock);
-    cout<<p->socket->sin_addr.s_addr<<endl;
     if(p != nullptr) {
         p->lastResponseTime = chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()).count();
@@ -50,8 +48,7 @@ void Map::setPlayerTimeResponse(sockaddr_in* sock){
 
 Player* Map::findPlayerBySocaddr(sockaddr_in* sock){
     for(int i = 0 ; i < this->players.size(); i++){
-        cout<<players.at(i)->socket->sin_addr.s_addr<<" "<<sock->sin_addr.s_addr<<endl;
-        if(this-> players.at(i)->socket != nullptr && this->players.at(i)->socket->sin_addr.s_addr == sock->sin_addr.s_addr){
+        if(this->players.at(i)->socket.sin_addr.s_addr == sock->sin_addr.s_addr){
             return this->players.at(i);
         }
     }

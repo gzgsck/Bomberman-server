@@ -25,6 +25,7 @@ int connection(Map* map);
 void sendBombs(int socket, Map* map, sockaddr_in client);
 void sendPlayers(int socket, Map* map, sockaddr_in client);
 void sendObstacles(int socket, Map* map, sockaddr_in client);
-void probeRequest(int socket, Map* map, sockaddr_in clientAddr);
+void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]);
 void sendMapForAllPlayers(int socket, Map* map);
+void sendPong(int socket, sockaddr_in clientAddr, Map* map);
 #endif //PROJECTBOOM_SERVERUDP_H

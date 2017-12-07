@@ -2,6 +2,7 @@
 // Created by grzegorz on 18.11.17.
 //
 
+#include <chrono>
 #include "ServerUDP.h"
 #include "Serializer.h"
 #include "Deserializer.h"
@@ -15,6 +16,7 @@ void sendObstacles(int socket, Map* map, sockaddr_in client);
 void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]);
 string deserializeProbeRequest(char tab[]);
 void sendMapForAllPlayers(int socket, Map* map);
+void sendPong(int socket, sockaddr_in clientAddr, Map* map);
 
 
 int connection(Map* map )
@@ -63,36 +65,21 @@ int connection(Map* map )
         char buffer[n];
         recvfrom(nSocket, buffer, n, 0,(struct sockaddr*)&stClientAddr, &nTmp);
         if(buffer[0] == 'p' && buffer[1] == 'r'){
-            //probe request
-            //pthread_t t;
-            //pthread_create(&t, NULL, call_thread, NULL);
             probeRequest(nSocket, map, stClientAddr, buffer);
-
-
-
             }
         if(buffer[0] == 'p' && buffer[1] == 'i') {
-            map->setPlayerTimeResponse(&stClientAddr);
+           sendPong(nSocket, stClientAddr, map);
         }
 
         if(map->checkAllPlayersHaveName()) {
-           // if(buffer[0] == 'a' && buffer[1] == 'b'){
+            if(buffer[0] == 'a' && buffer[1] == 'b'){
                 //todo odpowiedzi gracza
                 sendMapForAllPlayers(nSocket, map);
-            //}
-            for(int i = 0 ; i < map->players.size(); i++){
-                cout<<map->players.at(i)->socket->sin_addr.s_addr<< endl;
             }
+//            for(int i = 0 ; i < map->players.size(); i++){
+//                cout<<map->players.at(i)->lastResponseTime<<endl;
+//            }
         }
-
-
-
-
-
-//        sendBombs(nSocket, map, stClientAddr);
-//        sendPlayers(nSocket, map, stClientAddr);
-//        sendObstacles(nSocket, map, stClientAddr);
-
 
     }
 
@@ -115,6 +102,7 @@ void sendObstacles(int socket, Map* map, sockaddr_in clientAddr){
 }
 
 void sendPlayers(int socket, Map* map, sockaddr_in clientAddr){
+    //cout<<socket<<" "<< clientAddr.sin_addr.s_addr<<endl;
     string o = serializePlayers(map);
     char buffer[o.length()];
     strcpy(buffer, o.c_str());
@@ -150,22 +138,25 @@ void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]){
     }
 }
 
-
-
 // different thread
 void sendMapForAllPlayers(int socket, Map* map){
     for(int i = 0 ; i< map->players.size(); i++){
-        sendPlayers(socket, map, *map->players.at(i)->socket);
-        sendObstacles(socket, map, *map->players.at(i)->socket);
-        sendBombs(socket, map, *map->players.at(i)->socket);
+        sendPlayers(socket, map, map->players.at(i)->socket);
+        sendObstacles(socket, map, map->players.at(i)->socket);
+        sendBombs(socket, map, map->players.at(i)->socket);
     }
 }
 
-void sendPong(int socket, sockaddr_in clientAddr){
-    string o = "ok";
+void sendPong(int socket, sockaddr_in clientAddr, Map* map){
+    map->setPlayerTimeResponse(&clientAddr);
+    int time = chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+    string o = to_string(time);
     char buffer[o.length()];
     strcpy(buffer, o.c_str());
-    sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+    for(int i = 0; i < 10; i++) {
+        sendto(socket, buffer, o.length(), 0, (struct sockaddr *) &clientAddr, sizeof(clientAddr));
+    }
     return;
 }
 

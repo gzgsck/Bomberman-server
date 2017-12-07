@@ -14,6 +14,7 @@ class Bomb;
 class Player {
 
 public:
+    void setSocket(sockaddr_in* sock);
     Point* position;
     int id;
     string name = "";
@@ -24,7 +25,7 @@ public:
     Player();
     vector<Bomb*> bombs;
     int lastResponseTime;
-    sockaddr_in* socket;
+    sockaddr_in socket;
 
 };
 
