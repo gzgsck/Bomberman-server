@@ -43,8 +43,10 @@ Map* generateCells(Map* map){
 Map* generatePlayers(Map* map){
     for(int i = 0 ; i < PLAYERS_QUANTITY ; i++){
         Player* player = new Player();
-        player->position->x = map->cells[(i%2)*(MAP_SIZE-1)][((i/2)%2)*(MAP_SIZE-1)]->center->x;
-        player->position->y = map->cells[(i%2)*(MAP_SIZE-1)][((i/2)%2)*(MAP_SIZE-1)]->center->y;
+        player->position->x = map->cells[15][15]->center->x;
+        player->position->y = map->cells[15][15]->center->y;
+        //player->position->x = map->cells[(i%2)*(MAP_SIZE-1)][((i/2)%2)*(MAP_SIZE-1)]->center->x;
+        //player->position->y = map->cells[(i%2)*(MAP_SIZE-1)][((i/2)%2)*(MAP_SIZE-1)]->center->y;
         map->players.push_back(player);
         player->id = i + 1;
     }

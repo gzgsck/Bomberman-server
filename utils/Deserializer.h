@@ -9,7 +9,7 @@
 #include "../headers/Map.h"
 
 class Deserializer {
-    string deserializeProbeRequest(char tab[]);
+    void deserializeProbeRequest(char tab[], Map* map);
 };
 
 

@@ -79,7 +79,7 @@ string serializeBombs(Map* map){
 
 }
 string serializeToTableOfPlayers(Map* map){
-    string players = "p:";
+    string players = "pl:";
     players.append(to_string(map->players.size()));
     for(int i = 0; i< map->players.size(); i++){
         players.append("|");
