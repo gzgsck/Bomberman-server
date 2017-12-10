@@ -47,10 +47,10 @@ int connection(Map* map )
     setsockopt(nSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&nFoo, sizeof(nFoo));
 
     //non blocking
-//    struct timeval read_timeout;
-//    read_timeout.tv_sec = 0;
-//    read_timeout.tv_usec = 10;
-//    setsockopt(nSocket, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
+   struct timeval read_timeout;
+   read_timeout.tv_sec = 0;
+   read_timeout.tv_usec = 10;
+   setsockopt(nSocket, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
     /* bind a name to a socket */
     nBind = bind(nSocket, (struct sockaddr*)&stAddr, sizeof(struct sockaddr));
     if (nBind < 0)
@@ -59,17 +59,35 @@ int connection(Map* map )
         exit(1);
     }
 
-
+    int iter = 0; 
     while(1)
     {
         nTmp = sizeof(struct sockaddr);
         int n = 500;
         char buffer[n];
+        
         if (map->checkAllPlayersHaveName()) {
             //todo odpowiedzi gracza
             sendMapForAllPlayers(nSocket, map);
         }
-        if(recvfrom(nSocket, buffer, n, 0,(struct sockaddr*)&stClientAddr, &nTmp) > 0)
+        if (iter % 100 == 0) {
+            for (int i = 0; i < map->players.size(); i++) {
+                Player* player = map->players.at(i);
+                if (player->name.size() > 0) {
+                    int gameStatus =  map->checkAllPlayersHaveName() ? 0 : -1;
+                    
+                    struct sockaddr* address = (struct sockaddr*)&player->socket;
+                    socklen_t len = sizeof(player->socket);
+                    string o = serializeToTableOfPlayers(map, gameStatus, player);
+                    char buffer[o.length()];
+                    strcpy(buffer, o.c_str());
+                    sendto(nSocket, buffer, o.length(), 0, address, len);
+                }
+            }
+        }
+        
+        int length = recvfrom(nSocket, buffer, n, 0,(struct sockaddr*)&stClientAddr, &nTmp);
+        if (length > 0) {
             if (buffer[0] == 'p' && buffer[1] == 'r') {
                 probeRequest(nSocket, map, stClientAddr, buffer);
             }
@@ -85,8 +103,8 @@ int connection(Map* map )
                 cout<<buffer<<endl;
                 deserializeBomb(buffer, map, stClientAddr);
             }
-
-
+        }
+        iter = (iter + 1) % 10000;
     }
 
 }

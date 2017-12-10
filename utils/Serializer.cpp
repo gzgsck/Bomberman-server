@@ -30,7 +30,7 @@ string serializePlayers(Map* map){
     string players = "p:";
     players.append(to_string(map->players.size()));
     players.append("|");
-    for(int i = 0; i< map->players.size(); i++){
+    for(int i = 0; i < map->players.size(); i++){
         Player* p = map->players.at(i);
         players.append(to_string(p->id));
         players.append(",");
@@ -43,11 +43,11 @@ string serializePlayers(Map* map){
         players.append(to_string(p->position->x));
         players.append(",");
         players.append(to_string(p->position->y));
-        players.append("|");
+        if (i != map->players.size() - 1) {
+            players.append("|");
+        }
 
     }
-
-    players.append("+++");
     return players;
 }
 

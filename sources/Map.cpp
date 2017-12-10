@@ -48,7 +48,7 @@ void Map::setPlayerTimeResponse(sockaddr_in* sock){
 
 Player* Map::findPlayerBySocaddr(sockaddr_in* sock){
     for(int i = 0 ; i < this->players.size(); i++){
-        if(this->players.at(i)->socket.sin_addr.s_addr == sock->sin_addr.s_addr){
+        if(this->players.at(i)->socket.sin_addr.s_addr == sock->sin_addr.s_addr && this->players.at(i)->socket.sin_port == sock->sin_port){
             return this->players.at(i);
         }
     }
