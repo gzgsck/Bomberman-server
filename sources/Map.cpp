@@ -54,3 +54,25 @@ Player* Map::findPlayerBySocaddr(sockaddr_in* sock){
     }
     return nullptr ;
 }
+
+
+void Map::setPlayerMove(sockaddr_in* sock, int x, int y){
+    Player* player = this->findPlayerBySocaddr(sock);
+    player->position->y += y;
+    player->position->x += x;
+}
+
+void Map::setBombPlant(sockaddr_in* sock, int x, int y){
+    Player* player = this->findPlayerBySocaddr(sock);
+    //todo pozycja gracza czy x,y?
+    Cell* cell = getCellByPosition(player->position->x, player->position->y);
+    Bomb* bomb = new Bomb(player, player->bombPower);
+    bomb->owner = player;
+    player->bombs.push_back(bomb);
+    cell->bomb = bomb;
+
+}
+
+Cell* Map::getCellByPosition(int x, int y){
+    return this-> cells[x/MAP_FIELD_SIZE][y/MAP_FIELD_SIZE];
+}

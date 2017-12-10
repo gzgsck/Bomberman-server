@@ -10,6 +10,7 @@
 
 class Deserializer {
     void deserializeProbeRequest(char tab[], Map* map);
+    void deserializeBomb(char buffer[], Map* map, sockaddr_in clientAddr);
 };
 
 

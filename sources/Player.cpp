@@ -12,6 +12,7 @@ Player::Player() {
     this->isAlive = true;
     this->position = new Point();
     this->isActive = true;
+    this->bombPower = PLAYERS_START_BOMB_POWER;
 }
 
 void Player::setSocket(sockaddr_in *sock) {

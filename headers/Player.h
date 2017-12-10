@@ -24,6 +24,7 @@ public:
     bool isActive;
     Player();
     vector<Bomb*> bombs;
+    int bombPower;
     int lastResponseTime;
     sockaddr_in socket;
 

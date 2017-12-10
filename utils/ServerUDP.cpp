@@ -17,7 +17,7 @@ void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]);
 string deserializeProbeRequest(char tab[]);
 void sendMapForAllPlayers(int socket, Map* map);
 void sendPong(int socket, sockaddr_in clientAddr, Map* map, char buffer[]);
-
+void deserializeBomb(char buffer[], Map* map, sockaddr_in clientAddr);
 void deserializeMove(char tab[], Map* map, sockaddr_in clientAddr);
 
 
@@ -77,9 +77,13 @@ int connection(Map* map )
                 sendPong(nSocket, stClientAddr, map, buffer);
             }
 
-            if (buffer[0] == 'b' && buffer[1] == 'm') {
+            if (buffer[0] == 'm' && buffer[1] == 'v') {
                 cout<<buffer<<endl;
                 deserializeMove(buffer, map, stClientAddr);
+            }
+            if (buffer[0] == 'b' && buffer[1] == 'm') {
+                cout<<buffer<<endl;
+                deserializeBomb(buffer, map, stClientAddr);
             }
 
 

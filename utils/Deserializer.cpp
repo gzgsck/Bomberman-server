@@ -17,31 +17,28 @@ string deserializeProbeRequest(char tab[] ){
     return name;
 }
 
-void deserializeMove(char buffer[], Map* map, sockaddr_in clientAddr){
+void deserializeMove(char buffer[], Map* map, sockaddr_in clientAddr) {
     string bombs;
     bombs = std::string(buffer, 10);
     char tab[4];
     char tab2[4];
     strncpy(tab, buffer + 2, 4);
-    int* x = (int*)tab;
+    int *x = (int *) tab;
     strncpy(tab2, buffer + 6, 4);
-    int* y = (int*)tab2;
-    Player* player = map->findPlayerBySocaddr(&clientAddr);
-    cout<<*y<<" "<< *x<<endl;
-    player->position->y += *y;
-    player->position->x += *x;
+    int *y = (int *) tab2;
+    map->setPlayerMove(&clientAddr, *x, *y);
+}
 
     //todo refactor
-
-//    string bombs;
-//    bombs = std::string(buffer, 10);
-//    char tab[4];
-//    strncpy(tab, buffer + 2, 4);
-//    int* x = (int*)tab;
-//    strncpy(tab, buffer + 6, 4);
-//    int* y = (int*)tab;
-//
-//    cout<<*x<<" "<<*y<<endl;
+void deserializeBomb(char buffer[], Map* map, sockaddr_in clientAddr){
+    string bombs;
+    bombs = std::string(buffer, 10);
+    char tab[4];
+    strncpy(tab, buffer + 2, 4);
+    int* x = (int*)tab;
+    strncpy(tab, buffer + 6, 4);
+    int* y = (int*)tab;
+    map->setBombPlant(&clientAddr, *x, *y);
 
 }
 

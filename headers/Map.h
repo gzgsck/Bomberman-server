@@ -25,6 +25,9 @@ public:
     bool checkPlayerRequests(string name);
     void setPlayerTimeResponse(sockaddr_in* sock);
     Player* findPlayerBySocaddr(sockaddr_in* sock);
+    void setPlayerMove(sockaddr_in* sock, int x, int y);
+    void setBombPlant(sockaddr_in* sock, int x, int y);
+    Cell* getCellByPosition(int x, int y);
 };
 
 
