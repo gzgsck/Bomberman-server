@@ -16,24 +16,24 @@ bool Map::checkAllPlayersHaveName(){
     return true;
 }
 
-bool Map::checkIsOnPlayersList(string name){
-    for(int i = 0 ; i< this->players.size(); i++){
+int Map::checkIsOnPlayersList(string name){
+    for (int i = 0 ; i< this->players.size(); i++){
         if(this->players.at(i)->name.compare(name) == 0){
-            return true;
+            return i;
         }
     }
-    return false;
+    return -1;
 }
 
-bool Map::addPlayersNameToList(string name, sockaddr_in* sock){
-    if(checkAllPlayersHaveName()){
-        return false;
+int Map::addPlayersNameToList(string name, sockaddr_in* sock){
+    if (checkAllPlayersHaveName()) {
+        return -1;
     }
     for(int i = 0; i < this->players.size(); i++){
         if(this->players.at(i)->name.size()<1){
             this->players.at(i)->name = name;
             this->players.at(i)->setSocket(sock);
-            return true;
+            return i;
         }
     }
 }

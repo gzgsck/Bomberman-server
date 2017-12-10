@@ -8,7 +8,6 @@
 #include "Deserializer.h"
 #include "Configuration.h"
 
-
 ssize_t sendto(int i, char string[50], int i1, int i2);
 void sendBombs(int socket, Map* map, sockaddr_in addr);
 void sendPlayers(int socket, Map* map, sockaddr_in client);
@@ -43,6 +42,7 @@ int connection(Map* map )
         fprintf(stderr, "Can't create a socket.\n");
         exit(1);
     }
+    cout << "Server running on port: " << SERVER_PORT << endl;
 
     setsockopt(nSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&nFoo, sizeof(nFoo));
 
@@ -118,8 +118,10 @@ void sendPlayers(int socket, Map* map, sockaddr_in clientAddr){
 void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]){
     string name = deserializeProbeRequest(tab);
     string o;
-    if(!map->checkIsOnPlayersList(name)){
-        if(!map->addPlayersNameToList(name, &clientAddr)){
+    int idx = map->checkIsOnPlayersList(name);
+    if (idx == -1) {
+        idx = map->addPlayersNameToList(name, &clientAddr);
+        if (idx == -1) {
             o = "pr:-2";
             char buffer[o.length()];
             strcpy(buffer, o.c_str());
@@ -127,20 +129,16 @@ void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]){
             return;
         };
     }
-    if(!map->checkAllPlayersHaveName()){
-        o = "pr:-1";
-        char buffer[o.length()];
-        strcpy(buffer, o.c_str());
-        sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
-        return;
-    }
-    else{
-        o = serializeToTableOfPlayers(map);
-        char buffer[o.length()];
-        strcpy(buffer, o.c_str());
-        sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
-        return;
-    }
+
+    Player* player = map->players.at(idx);
+
+    int allPlayersReady = map->checkAllPlayersHaveName();
+    int gameStatus = allPlayersReady ? 0 : -1;
+
+    o = serializeToTableOfPlayers(map, -1, player);
+    char buffer[o.length()];
+    strcpy(buffer, o.c_str());
+    sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
 }
 
 // different thread

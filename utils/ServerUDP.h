@@ -19,7 +19,7 @@
 #include <arpa/inet.h>
 #include <time.h>
 #include "../headers/Map.h"
-
+#include "../headers/Player.h"
 
 int connection(Map* map);
 void sendBombs(int socket, Map* map, sockaddr_in client);
