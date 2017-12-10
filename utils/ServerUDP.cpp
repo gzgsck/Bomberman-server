@@ -86,7 +86,7 @@ int connection(Map* map )
             }
         }
         
-        int length = recvfrom(nSocket, buffer, n, 0,(struct sockaddr*)&stClientAddr, &nTmp);
+        int length = recvfrom(nSocket, buffer, n, 0, (struct sockaddr*)&stClientAddr, &nTmp);
         if (length > 0) {
             if (buffer[0] == 'p' && buffer[1] == 'r') {
                 probeRequest(nSocket, map, stClientAddr, buffer);
@@ -146,6 +146,10 @@ void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]){
             sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
             return;
         };
+    } else {
+        if (map->players.at(idx)->socket.sin_addr.s_addr == clientAddr.sin_addr.s_addr) {
+            map->players.at(idx)->setSocket(&clientAddr);
+        }
     }
 
     Player* player = map->players.at(idx);

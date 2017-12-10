@@ -8,5 +8,6 @@
 Bomb::Bomb(Player* player, int aPower) {
     owner = player;
     power = aPower;
+    durationTime = 3500;
     timestamp = chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
