@@ -5,6 +5,8 @@
 #include "Player.h"
 #include "Obstacle.h"
 #include "Bomb.h"
+#include "Cell.h"
+#include "../utils/Configuration.h"
 
 using namespace std;
 
@@ -14,11 +16,19 @@ class Bomb;
 
 class Map {
 
-private:
+public:
     vector<Player*> players;
-    vector<Obstacle*> obstacles;
-    vector<Bomb*> bombs;
-    int mapSize;
+    Cell* cells[MAP_SIZE][MAP_SIZE];
+    bool checkAllPlayersHaveName();
+    int checkIsOnPlayersList(string name);
+    int addPlayersNameToList(string name, sockaddr_in* sock);
+    bool checkPlayerRequests(string name);
+    void setPlayerTimeResponse(sockaddr_in* sock);
+    Player* findPlayerBySocaddr(sockaddr_in* sock);
+    void setPlayerMove(sockaddr_in* sock, int x, int y);
+    void setBombPlant(sockaddr_in* sock, int x, int y);
+    Cell* getCellByPosition(int x, int y);
+    bool canPlantBomb(Player* player, Cell* cell);
 };
 
 

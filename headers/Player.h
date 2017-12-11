@@ -2,6 +2,7 @@
 #define PROJECTBOOM_PLAYER_H
 #include <iostream>
 #include <vector>
+#include <netinet/in.h>
 #include "Point.h"
 #include "Bomb.h"
 
@@ -12,14 +13,22 @@ class Bomb;
 
 class Player {
 
-private:
+public:
+    void setSocket(sockaddr_in* sock);
+    void plantBomb(Bomb* bomb);
+    bool isPlayerOnField(int x, int y);
     Point* position;
-    int score;
-    string name;
+    int id;
+    string name = "";
     int avaliableBombs;
-    vector<Bomb*> bombs;
     int lifes;
     bool isAlive;
+    bool isActive;
+    Player();
+    vector<Bomb*> bombs;
+    int bombPower;
+    int lastResponseTime;
+    sockaddr_in socket;
 
 };
 

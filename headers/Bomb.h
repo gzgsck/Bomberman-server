@@ -11,12 +11,12 @@ class Player;
 
 class Bomb {
 
-private:
-    Cell* position;
+public:
     Player* owner;
     int power;
     int durationTime;
-
+    long timestamp;
+    Bomb(Player* owner, int power);
 };
 
 
