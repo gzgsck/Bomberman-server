@@ -15,7 +15,7 @@ public:
     Player* owner;
     int power;
     int durationTime;
-    int timestamp;
+    long timestamp;
     Bomb(Player* owner, int power);
 };
 

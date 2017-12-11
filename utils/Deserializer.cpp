@@ -31,6 +31,7 @@ void deserializeMove(char buffer[], Map* map, sockaddr_in clientAddr) {
 
     //todo refactor
 void deserializeBomb(char buffer[], Map* map, sockaddr_in clientAddr){
+
     string bombs;
     bombs = std::string(buffer, 10);
     char tab[4];

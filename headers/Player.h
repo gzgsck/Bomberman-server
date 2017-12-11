@@ -15,6 +15,8 @@ class Player {
 
 public:
     void setSocket(sockaddr_in* sock);
+    void plantBomb(Bomb* bomb);
+    bool isPlayerOnField(int x, int y);
     Point* position;
     int id;
     string name = "";

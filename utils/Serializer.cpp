@@ -58,7 +58,7 @@ string serializeBombs(Map* map){
         for (int k = 0; k < MAP_SIZE; k++) {
             if (map->cells[i][k]->bomb != nullptr) {
                 bombsQuantity++;
-                bombs.append(to_string(i*MAP_SIZE + k));
+                bombs.append(to_string(i*MAP_SIZE + (k + 1)));
                 bombs.append(",");
                 bombs.append(to_string(map->cells[i][k]->bomb->power));
                 bombs.append(",");

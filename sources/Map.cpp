@@ -64,13 +64,27 @@ void Map::setPlayerMove(sockaddr_in* sock, int x, int y){
 
 void Map::setBombPlant(sockaddr_in* sock, int x, int y){
     Player* player = this->findPlayerBySocaddr(sock);
-    //todo pozycja gracza czy x,y?
     Cell* cell = getCellByPosition(x, y);
+    if(canPlantBomb(player, cell) == false){
+        return;
+    }
     Bomb* bomb = new Bomb(player, player->bombPower);
+    player->plantBomb(bomb);
     bomb->owner = player;
-    player->bombs.push_back(bomb);
     cell->bomb = bomb;
+}
 
+bool Map::canPlantBomb(Player* player, Cell* cell){
+    if(player->avaliableBombs - player->bombs.size() <= 0){
+        return false;
+    }
+    if(cell->bomb != nullptr){
+        return false;
+    }
+    if(cell->obstacle != nullptr){
+        return false;
+    }
+    return true;
 }
 
 Cell* Map::getCellByPosition(int x, int y){

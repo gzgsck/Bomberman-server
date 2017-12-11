@@ -23,3 +23,17 @@ void Player::setSocket(sockaddr_in *sock) {
     this->socket.sin_family = sock->sin_family;
     this->socket.sin_port = sock->sin_port;
 }
+
+void Player::plantBomb(Bomb* bomb){
+    this->bombs.push_back(bomb);
+    avaliableBombs -= 1;
+}
+
+bool Player::isPlayerOnField(int x, int y){
+    int playerX = this->position->x/MAP_FIELD_SIZE;
+    int playerY = this->position->y/MAP_FIELD_SIZE;
+    if(playerX == x && playerY == y){
+        return true;
+    }
+    return false;
+}
