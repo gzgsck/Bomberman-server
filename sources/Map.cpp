@@ -75,10 +75,12 @@ void Map::setBombPlant(sockaddr_in* sock, int x, int y){
 }
 
 bool Map::canPlantBomb(Player* player, Cell* cell){
-    if(player->avaliableBombs - player->bombs.size() <= 0){
+    if(player->avaliableBombs <= 0){
+        cout << "No more bombs" << endl;
         return false;
     }
     if(cell->bomb != nullptr){
+        cout << "Already bomb" << endl;
         return false;
     }
     if(cell->obstacle != nullptr){
@@ -88,5 +90,5 @@ bool Map::canPlantBomb(Player* player, Cell* cell){
 }
 
 Cell* Map::getCellByPosition(int x, int y){
-    return this-> cells[x][y];
+    return this-> cells[y][x];
 }
