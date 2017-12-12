@@ -29,7 +29,6 @@ void deserializeMove(char buffer[], Map* map, sockaddr_in clientAddr) {
     map->setPlayerMove(&clientAddr, *x, *y);
 }
 
-    //todo refactor
 void deserializeBomb(char buffer[], Map* map, sockaddr_in clientAddr){
 
     string bombs;

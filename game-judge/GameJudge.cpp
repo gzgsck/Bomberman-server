@@ -13,7 +13,6 @@ void manageBombsExplosions(Map* map) {
             else{
                 long serverTime = chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
                 Bomb* bomb = map->cells[i][k]->bomb;
-                cout<<bomb->timestamp + bomb->durationTime<<"   "<<serverTime<<endl;
                 if(bomb->timestamp + bomb->durationTime <= serverTime){
                     searchInRange(map, i, k);
                 }
@@ -24,15 +23,15 @@ void manageBombsExplosions(Map* map) {
 
 void searchInRange(Map* map, int cellX, int cellY){
     Bomb* bomb = map->cells[cellX][cellY]->bomb;
-    bomb->owner->avaliableBombs += 1;
     int range = bomb->power;
     int xL = (cellX - range < 0)? 0 : cellX - range;
     int xR = (cellX + range > MAP_SIZE - 1)? MAP_SIZE - 1 : cellX + range;
-    int yU = (cellY - range < 0)? 0 : cellX - range;
-    int yD = (cellY + range > MAP_SIZE - 1)? MAP_SIZE - 1 : cellX + range;
+    int yU = (cellY - range < 0)? 0 : cellY - range;
+    int yD = (cellY + range > MAP_SIZE - 1)? MAP_SIZE - 1 : cellY + range;
 
 
     map->cells[cellX][cellY]->bomb = nullptr;
+    bomb->owner->removeBomb(bomb);
 
     for(xL; xL <= xR; xL++){
         if(map->cells[xL][cellY]->bomb != nullptr){
@@ -49,7 +48,7 @@ void searchInRange(Map* map, int cellX, int cellY){
         if(map->cells[cellX][yU]->bomb != nullptr){
             searchInRange(map, cellX, yU);
         }
-        if(map->cells[xL][cellY]->obstacle != nullptr){
+        if(map->cells[cellX][yU]->obstacle != nullptr){
             destroyObstacle(map, cellX, yU);
         }
         killPlayerOnField(map, cellX, yU);
@@ -57,7 +56,9 @@ void searchInRange(Map* map, int cellX, int cellY){
 }
 
 void destroyObstacle(Map* map, int x, int y){
+    cout<<"jazdaaaaaaaaaaaaaaa"<<x<<" "<<y<<endl;
     if(map->cells[x][y]->obstacle->isDestroyable()){
+        cout<<"jazda"<<x<<" "<<y<<endl;
         map->cells[x][y]->obstacle = nullptr;
     }
 }
@@ -71,6 +72,7 @@ void killPlayerOnField(Map* map, int x, int y){
             }
             else{
                 map->players.at(i)->lifes-=1;
+                cout<<map->players.at(i)->lifes<<endl;
                 continue;
             }
         }

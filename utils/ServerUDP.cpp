@@ -96,11 +96,9 @@ int connection(Map* map )
             }
 
             if (buffer[0] == 'm' && buffer[1] == 'v') {
-                cout<<buffer<<endl;
                 deserializeMove(buffer, map, stClientAddr);
             }
             if (buffer[0] == 'b' && buffer[1] == 'm') {
-                cout<<buffer<<endl;
                 deserializeBomb(buffer, map, stClientAddr);
             }
         }
