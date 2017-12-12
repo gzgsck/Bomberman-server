@@ -15,6 +15,7 @@ Map* generateMap();
 Map* generateCells(Map* map);
 Map* generateObstacles(Map* map);
 Map* generatePlayers(Map* map);
+void clearFieldsForPlayers(Map* map, int cellX, int cellY);
 
 
 
