@@ -58,13 +58,21 @@ Map* generatePlayers(Map* map){
 }
 
 void clearFieldsForPlayers(Map* map, int cellX, int cellY){
-    if(cellX < MAP_SIZE -2){
-        map->cells[cellX + 1][cellY]->obstacle = nullptr;
-        map->cells[cellX + 2][cellY]->obstacle = nullptr;
+    map->cells[cellY][cellX]->obstacle = nullptr;
+    
+    if (cellX < MAP_SIZE - 2){
+        map->cells[cellY][cellX + 1]->obstacle = nullptr;
     }
 
-    if(cellX > 2){
-        map->cells[cellX - 1][cellY]->obstacle = nullptr;
-        map->cells[cellX - 2][cellY]->obstacle = nullptr;
+    if (cellY < MAP_SIZE - 2){
+        map->cells[cellY + 1][cellX]->obstacle = nullptr;
+    }
+
+    if (cellX > 2){
+        map->cells[cellY][cellX - 1]->obstacle = nullptr;
+    }
+
+    if (cellY > 2){
+        map->cells[cellY - 1][cellX]->obstacle = nullptr;
     }
 }

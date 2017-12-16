@@ -7,7 +7,7 @@ string serializeObstacles(Map* map){
     string obstacles = "o:";
     obstacles.append(to_string(MAP_SIZE * MAP_SIZE));
     obstacles.append("|");
-    for(int i = 0; i < MAP_SIZE ; i++) {
+    for (int i = 0; i < MAP_SIZE; i++) {
         for (int k = 0; k < MAP_SIZE; k++) {
             if (map->cells[i][k]->obstacle == nullptr) {
                 obstacles.append("0");
@@ -22,7 +22,6 @@ string serializeObstacles(Map* map){
             }
         }
     }
-    obstacles.append("+++");
     return obstacles;
 }
 
