@@ -29,6 +29,7 @@ public:
     void setBombPlant(sockaddr_in* sock, int x, int y);
     Cell* getCellByPosition(int x, int y);
     bool canPlantBomb(Player* player, Cell* cell);
+    bool canMoveTo(Player* player, int x , int y);
 };
 
 

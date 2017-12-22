@@ -22,7 +22,7 @@ Map* generateObstacles(Map* map){
             if(value == 0 || value == 1 || value == 3) {
                 map->cells[i][k]->obstacle = new DestroyableObstacle();
             }
-            if(value == 2) {
+            if(value == 4) {
                 map->cells[i][k]->obstacle = new UndestroyableObstacle();
             }
         }
