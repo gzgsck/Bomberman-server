@@ -17,6 +17,7 @@ class Bomb;
 class Map {
 
 public:
+    pthread_mutex_t	mutex = PTHREAD_MUTEX_INITIALIZER;
     vector<Player*> players;
     Cell* cells[MAP_SIZE][MAP_SIZE];
     bool checkAllPlayersHaveName();

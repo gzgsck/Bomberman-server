@@ -28,4 +28,9 @@ void sendObstacles(int socket, Map* map, sockaddr_in client);
 void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]);
 void sendMapForAllPlayers(int socket, Map* map);
 void sendPong(int socket, sockaddr_in clientAddr, Map* map, char tab[]);
+struct mapToSendStruct{
+    Map* map;
+    int socket;
+};
+void *diffThreadMapSender(void *structure);
 #endif //PROJECTBOOM_SERVERUDP_H

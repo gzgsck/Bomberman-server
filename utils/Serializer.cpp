@@ -53,6 +53,7 @@ string serializePlayers(Map* map){
 string serializeBombs(Map* map){
     int bombsQuantity = 0;
     string bombs = "";
+    pthread_mutex_lock(&map->mutex);
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int k = 0; k < MAP_SIZE; k++) {
             if (map->cells[i][k]->bomb != nullptr) {
@@ -70,6 +71,7 @@ string serializeBombs(Map* map){
             }
         }
     }
+    pthread_mutex_unlock(&map->mutex);
     string returnedValue = "";
     returnedValue.append("b:");
     returnedValue.append(to_string(bombsQuantity));
