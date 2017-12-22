@@ -7,7 +7,6 @@
 
 
 void manageBombsExplosions(Map* map) {
-    pthread_mutex_lock(&map->mutex);
     for(int i = 0; i < MAP_SIZE; i++){
         for(int k = 0 ; k < MAP_SIZE; k++){
             if(map->cells[i][k]->bomb == nullptr){ continue;}
@@ -20,7 +19,6 @@ void manageBombsExplosions(Map* map) {
             }
         }
     }
-    pthread_mutex_unlock(&map->mutex);
 }
 void searchInRange(Map* map, int cellX, int cellY){
     Bomb* bomb = map->cells[cellX][cellY]->bomb;
@@ -30,9 +28,10 @@ void searchInRange(Map* map, int cellX, int cellY){
     int yU = (cellY - range < 0)? 0 : cellY - range;
     int yD = (cellY + range > MAP_SIZE - 1)? MAP_SIZE - 1 : cellY + range;
 
-
+    pthread_mutex_lock(&map->mutex);
     map->cells[cellX][cellY]->bomb = nullptr;
     bomb->owner->removeBomb(bomb);
+    pthread_mutex_unlock(&map->mutex);
 
     for(int i = cellX; i <= xR; i++){
         if(map->cells[i][cellY]->bomb != nullptr){
@@ -85,7 +84,9 @@ void searchInRange(Map* map, int cellX, int cellY){
 
 void destroyObstacle(Map* map, int x, int y){
     if(map->cells[x][y]->obstacle->isDestroyable()){
+        pthread_mutex_lock(&map->mutex);
         map->cells[x][y]->obstacle = nullptr;
+        pthread_mutex_unlock(&map->mutex);
     }
 }
 
