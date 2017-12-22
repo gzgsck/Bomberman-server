@@ -65,7 +65,7 @@ int connection(Map* map )
         nTmp = sizeof(struct sockaddr);
         int n = 500;
         char buffer[n];
-        
+
         if (map->checkAllPlayersHaveName()) {
             //todo odpowiedzi gracza
             sendMapForAllPlayers(nSocket, map);
