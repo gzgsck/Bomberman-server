@@ -17,6 +17,7 @@ void *diffThread(void*){
     while(true) {
         sleep(0.5);
         manageBombsExplosions(map);
+        manageFires(map);
     }
 }
 

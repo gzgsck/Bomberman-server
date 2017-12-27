@@ -6,6 +6,7 @@
 #include "Obstacle.h"
 #include "Bomb.h"
 #include "Cell.h"
+#include "Fire.h"
 #include "../utils/Configuration.h"
 
 using namespace std;
@@ -13,6 +14,7 @@ using namespace std;
 class Player;
 class Obstacle;
 class Bomb;
+class Fire;
 
 class Map {
 

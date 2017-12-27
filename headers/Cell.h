@@ -4,12 +4,14 @@
 #include "Point.h"
 #include "Obstacle.h"
 #include "Bomb.h"
+#include "Fire.h"
 
 using namespace std;
 
 class Point;
 class Obstacle;
 class Bomb;
+class Fire;
 
 class Cell {
 
@@ -17,6 +19,7 @@ public:
     Point* center;
     Obstacle* obstacle;
     Bomb* bomb;
+    Fire* fire;
     Cell(Point* point);
 };
 

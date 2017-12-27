@@ -21,6 +21,22 @@ void manageBombsExplosions(Map* map) {
     }
 }
 
+void manageFires(Map* map) {
+    for(int i = 0; i < MAP_SIZE; i++){
+        for(int k = 0 ; k < MAP_SIZE; k++){
+            if(map->cells[i][k]->fire == nullptr){ continue;}
+            else{
+                long serverTime = chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                Fire* fire = map->cells[i][k]->fire;
+                if (fire->timestamp + fire->durationTime <= serverTime) {
+                    delete fire;
+                    map->cells[i][k]->fire = nullptr;
+                }
+            }
+        }
+    }
+}
+
 void searchInRange(Map* map, int cellX, int cellY){
     Bomb* bomb = map->cells[cellX][cellY]->bomb;
     int range = bomb->power;
@@ -31,29 +47,34 @@ void searchInRange(Map* map, int cellX, int cellY){
 
 
     map->cells[cellX][cellY]->bomb = nullptr;
+    map->cells[cellX][cellY]->fire = new Fire(1000);
     bomb->owner->removeBomb(bomb);
 
-    for(int i = cellX; i <= xR; i++){
-        if(map->cells[i][cellY]->bomb != nullptr){
+    for (int i = cellX; i <= xR; i++) {
+        if (map->cells[i][cellY]->bomb != nullptr) {
             searchInRange(map, i, cellY);
             break;
         }
-        if(map->cells[i][cellY]->obstacle != nullptr){
+        if (map->cells[i][cellY]->obstacle != nullptr) {
             destroyObstacle(map, i, cellY);
             break;
         }
+        map->cells[i][cellY]->fire = new Fire(1000);
+
         killPlayerOnField(map, i, cellY);
     }
 
-    for(int i = cellX; i >= xL; i--){
-        if(map->cells[i][cellY]->bomb != nullptr){
+    for (int i = cellX; i >= xL; i--){
+        if (map->cells[i][cellY]->bomb != nullptr){
             searchInRange(map, i, cellY);
             break;
         }
-        if(map->cells[i][cellY]->obstacle != nullptr){
+        if (map->cells[i][cellY]->obstacle != nullptr){
             destroyObstacle(map, i, cellY);
             break;
         }
+        map->cells[i][cellY]->fire = new Fire(1000);
+
         killPlayerOnField(map, i, cellY);
     }
 
@@ -66,6 +87,8 @@ void searchInRange(Map* map, int cellX, int cellY){
             destroyObstacle(map, cellX, i);
             break;
         }
+        map->cells[i][cellY]->fire = new Fire(1000);
+
         killPlayerOnField(map, cellX, i);
     }
 
@@ -78,6 +101,8 @@ void searchInRange(Map* map, int cellX, int cellY){
             destroyObstacle(map, cellX, i);
             break;
         }
+        map->cells[i][cellY]->fire = new Fire(1000);
+
         killPlayerOnField(map, cellX, i);
     }
 }
@@ -90,12 +115,17 @@ void destroyObstacle(Map* map, int x, int y) {
 
 void killPlayerOnField(Map* map, int row, int col) {
     for (int i = 0; i < map->players.size(); i++) {
-        if (map->players.at(i)->isPlayerOnField(row, col)) {
-            map->players.at(i)->lifes -= 1;
+        Player *player = map->players.at(i);
+        if (player->isProtected) {
+            continue;
+        }
+        if (player->isPlayerOnField(row, col)) {
+            player->lifes -= 1;
 
-            if (map->players.at(i)->lifes < 1) {
-                map->players.at(i)->isAlive = false;
+            if (player->lifes < 1) {
+                player->isAlive = false;
             }
+            player->isProtected = true;
         }
     }
 }

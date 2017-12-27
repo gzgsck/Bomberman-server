@@ -5,11 +5,13 @@
 #include <netinet/in.h>
 #include "Point.h"
 #include "Bomb.h"
+#include "Fire.h"
 
 using namespace std;
 
 class Point;
 class Bomb;
+class Fire;
 
 class Player {
 
@@ -26,6 +28,7 @@ public:
     bool isAlive;
     bool isActive;
     bool resetPosition;
+    bool isProtected;
     Player();
     vector<Bomb*> bombs;
     int bombPower;

@@ -64,6 +64,18 @@ void Map::setPlayerMove(sockaddr_in* sock, int x, int y) {
     if (player->resetPosition) {
         return;
     }
+
+    Cell* cell = getCellByPosition(x/MAP_FIELD_SIZE, y/MAP_FIELD_SIZE);
+    if (cell->fire != nullptr) {
+        if (!player->isProtected) {
+            player->lifes -= 1;
+
+            if (player->lifes < 1) {
+                player->isAlive = false;
+            }
+            player->isProtected = true;
+        }
+    }
     player->position->y = y;
     player->position->x = x;
 }

@@ -14,6 +14,7 @@ Player::Player() {
     this->isActive = true;
     this->resetPosition = false;
     this->bombPower = PLAYERS_START_BOMB_POWER;
+    this->isProtected = false;
 }
 
 void Player::setSocket(sockaddr_in *sock) {
