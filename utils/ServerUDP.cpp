@@ -27,6 +27,7 @@ int connection(Map* map )
     int nFoo = 1;
     socklen_t nTmp;
     struct sockaddr_in stAddr, stClientAddr;
+    bool isSendingMap = false;
 
 
     /* address structure */
@@ -65,10 +66,15 @@ int connection(Map* map )
         nTmp = sizeof(struct sockaddr);
         int n = 500;
         char buffer[n];
-        
-        if (map->checkAllPlayersHaveName()) {
-            //todo odpowiedzi gracza
-            sendMapForAllPlayers(nSocket, map);
+
+        if (map->checkAllPlayersHaveName() && isSendingMap == false) {
+            isSendingMap = true;
+            pthread_t thread;
+            mapToSendStruct structure;
+            cout<<"ok"<<endl;
+            structure.socket = nSocket;
+            structure.map = map;
+            pthread_create(&thread, NULL, diffThreadMapSender, (void*) &structure);
         }
         if (iter % 100 == 0) {
             for (int i = 0; i < map->players.size(); i++) {
@@ -96,17 +102,23 @@ int connection(Map* map )
             }
 
             if (buffer[0] == 'm' && buffer[1] == 'v') {
-                cout<<buffer<<endl;
                 deserializeMove(buffer, map, stClientAddr);
             }
             if (buffer[0] == 'b' && buffer[1] == 'm') {
-                cout<<buffer<<endl;
                 deserializeBomb(buffer, map, stClientAddr);
             }
         }
         iter = (iter + 1) % 10000;
     }
 
+}
+
+void *diffThreadMapSender(void *structure){
+    while(true) {
+        mapToSendStruct* str;
+        str = (mapToSendStruct*)structure;
+        sendMapForAllPlayers(str->socket, str->map);
+    }
 }
 
 void sendBombs(int socket, Map* map, sockaddr_in clientAddr){

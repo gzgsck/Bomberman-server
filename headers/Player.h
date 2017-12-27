@@ -17,6 +17,7 @@ public:
     void setSocket(sockaddr_in* sock);
     void plantBomb(Bomb* bomb);
     bool isPlayerOnField(int x, int y);
+    void removeBomb(Bomb* bomb);
     Point* position;
     int id;
     string name = "";

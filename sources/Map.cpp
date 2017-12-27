@@ -58,11 +58,32 @@ Player* Map::findPlayerBySocaddr(sockaddr_in* sock){
 
 void Map::setPlayerMove(sockaddr_in* sock, int x, int y){
     Player* player = this->findPlayerBySocaddr(sock);
+    if(canMoveTo(player, x, y) == false){
+        return ;
+    }
     player->position->y += y;
     player->position->x += x;
+    //todo player->position->y = y;
+    //todo player->position->x = x;
+}
+
+// todo change after changes in coords
+bool Map::canMoveTo(Player* player, int x , int y){
+    Cell* cell = getCellByPosition( (player->position->x + x)/MAP_FIELD_SIZE, (player->position->y + y)/MAP_FIELD_SIZE);
+    //todo Cell* cell = getCellByPosition( x/MAP_FIELD_SIZE, y/MAP_FIELD_SIZE);
+    //if(player->position->x/MAP_FIELD_SIZE == x/MAP_FIELD_SIZE && player->position->y == y/MAP_FIELD_SIZE){
+    //    return true;
+    //}
+    cout<<player->position->x<<" "<<player->position->y<<endl;
+    if(cell->obstacle != nullptr || cell->bomb!= nullptr){
+        return true;
+        //todo return false;
+    }
+    return true;
 }
 
 void Map::setBombPlant(sockaddr_in* sock, int x, int y){
+
     Player* player = this->findPlayerBySocaddr(sock);
     Cell* cell = getCellByPosition(x, y);
     if(canPlantBomb(player, cell) == false){
@@ -76,9 +97,11 @@ void Map::setBombPlant(sockaddr_in* sock, int x, int y){
 
 bool Map::canPlantBomb(Player* player, Cell* cell){
     if(player->avaliableBombs - player->bombs.size() <= 0){
+        cout << "No more bombs" << endl;
         return false;
     }
     if(cell->bomb != nullptr){
+        cout << "Already bomb" << endl;
         return false;
     }
     if(cell->obstacle != nullptr){
@@ -88,5 +111,5 @@ bool Map::canPlantBomb(Player* player, Cell* cell){
 }
 
 Cell* Map::getCellByPosition(int x, int y){
-    return this-> cells[x][y];
+    return this-> cells[y][x];
 }

@@ -13,7 +13,6 @@ void manageBombsExplosions(Map* map) {
             else{
                 long serverTime = chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
                 Bomb* bomb = map->cells[i][k]->bomb;
-                cout<<bomb->timestamp + bomb->durationTime<<"   "<<serverTime<<endl;
                 if(bomb->timestamp + bomb->durationTime <= serverTime){
                     searchInRange(map, i, k);
                 }
@@ -21,44 +20,73 @@ void manageBombsExplosions(Map* map) {
         }
     }
 }
-
 void searchInRange(Map* map, int cellX, int cellY){
     Bomb* bomb = map->cells[cellX][cellY]->bomb;
-    bomb->owner->avaliableBombs += 1;
     int range = bomb->power;
     int xL = (cellX - range < 0)? 0 : cellX - range;
     int xR = (cellX + range > MAP_SIZE - 1)? MAP_SIZE - 1 : cellX + range;
-    int yU = (cellY - range < 0)? 0 : cellX - range;
-    int yD = (cellY + range > MAP_SIZE - 1)? MAP_SIZE - 1 : cellX + range;
+    int yU = (cellY - range < 0)? 0 : cellY - range;
+    int yD = (cellY + range > MAP_SIZE - 1)? MAP_SIZE - 1 : cellY + range;
 
-
+    pthread_mutex_lock(&map->mutex);
     map->cells[cellX][cellY]->bomb = nullptr;
+    bomb->owner->removeBomb(bomb);
+    pthread_mutex_unlock(&map->mutex);
 
-    for(xL; xL <= xR; xL++){
-        if(map->cells[xL][cellY]->bomb != nullptr){
-            searchInRange(map, xL, cellY);
+    for(int i = cellX; i <= xR; i++){
+        if(map->cells[i][cellY]->bomb != nullptr){
+            searchInRange(map, i, cellY);
+            break;
         }
-        if(map->cells[xL][cellY]->obstacle != nullptr){
-            destroyObstacle(map, xL, cellY);
+        if(map->cells[i][cellY]->obstacle != nullptr){
+            destroyObstacle(map, i, cellY);
+            break;
         }
-        killPlayerOnField(map, xL, cellY);
+        killPlayerOnField(map, i, cellY);
     }
 
-    for(yU; yU <= yD; yU++){
-        if(yU == cellY){ continue;}
-        if(map->cells[cellX][yU]->bomb != nullptr){
-            searchInRange(map, cellX, yU);
+    for(int i = cellX; i >= xL; i--){
+        if(map->cells[i][cellY]->bomb != nullptr){
+            searchInRange(map, i, cellY);
+            break;
         }
-        if(map->cells[xL][cellY]->obstacle != nullptr){
-            destroyObstacle(map, cellX, yU);
+        if(map->cells[i][cellY]->obstacle != nullptr){
+            destroyObstacle(map, i, cellY);
+            break;
         }
-        killPlayerOnField(map, cellX, yU);
+        killPlayerOnField(map, i, cellY);
+    }
+
+    for(int i = cellY; i >= yU; i--){
+        if(map->cells[cellX][i]->bomb != nullptr){
+            searchInRange(map, cellX, i);
+            break;
+        }
+        if(map->cells[cellX][i]->obstacle != nullptr){
+            destroyObstacle(map, cellX, i);
+            break;
+        }
+        killPlayerOnField(map, cellX, i);
+    }
+
+    for(int i = cellY; i <= yD; i++){
+        if(map->cells[cellX][i]->bomb != nullptr){
+            searchInRange(map, cellX, i);
+            break;
+        }
+        if(map->cells[cellX][i]->obstacle != nullptr){
+            destroyObstacle(map, cellX, i);
+            break;
+        }
+        killPlayerOnField(map, cellX, i);
     }
 }
 
 void destroyObstacle(Map* map, int x, int y){
     if(map->cells[x][y]->obstacle->isDestroyable()){
+        pthread_mutex_lock(&map->mutex);
         map->cells[x][y]->obstacle = nullptr;
+        pthread_mutex_unlock(&map->mutex);
     }
 }
 
@@ -71,6 +99,7 @@ void killPlayerOnField(Map* map, int x, int y){
             }
             else{
                 map->players.at(i)->lifes-=1;
+                cout<<map->players.at(i)->lifes<<endl;
                 continue;
             }
         }

@@ -26,7 +26,6 @@ void Player::setSocket(sockaddr_in *sock) {
 
 void Player::plantBomb(Bomb* bomb){
     this->bombs.push_back(bomb);
-    avaliableBombs -= 1;
 }
 
 bool Player::isPlayerOnField(int x, int y){
@@ -36,4 +35,14 @@ bool Player::isPlayerOnField(int x, int y){
         return true;
     }
     return false;
+}
+
+void Player::removeBomb(Bomb* bomb){
+    int i;
+    for(i = 0; i < bombs.size(); i++){
+        if(bombs.at(i)->timestamp == bomb->timestamp){
+            break;
+        }
+    }
+    this->bombs.erase(bombs.begin() + i);
 }

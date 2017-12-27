@@ -7,7 +7,7 @@ string serializeObstacles(Map* map){
     string obstacles = "o:";
     obstacles.append(to_string(MAP_SIZE * MAP_SIZE));
     obstacles.append("|");
-    for(int i = 0; i < MAP_SIZE ; i++) {
+    for (int i = 0; i < MAP_SIZE; i++) {
         for (int k = 0; k < MAP_SIZE; k++) {
             if (map->cells[i][k]->obstacle == nullptr) {
                 obstacles.append("0");
@@ -22,7 +22,6 @@ string serializeObstacles(Map* map){
             }
         }
     }
-    obstacles.append("+++");
     return obstacles;
 }
 
@@ -54,11 +53,14 @@ string serializePlayers(Map* map){
 string serializeBombs(Map* map){
     int bombsQuantity = 0;
     string bombs = "";
+    pthread_mutex_lock(&map->mutex);
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int k = 0; k < MAP_SIZE; k++) {
             if (map->cells[i][k]->bomb != nullptr) {
                 bombsQuantity++;
-                bombs.append(to_string(i*MAP_SIZE + (k + 1)));
+                bombs.append(to_string(i*MAP_SIZE + (k)));
+                bombs.append(",");
+                bombs.append(to_string(map->cells[i][k]->bomb->owner->id));
                 bombs.append(",");
                 bombs.append(to_string(map->cells[i][k]->bomb->power));
                 bombs.append(",");
@@ -69,6 +71,7 @@ string serializeBombs(Map* map){
             }
         }
     }
+    pthread_mutex_unlock(&map->mutex);
     string returnedValue = "";
     returnedValue.append("b:");
     returnedValue.append(to_string(bombsQuantity));

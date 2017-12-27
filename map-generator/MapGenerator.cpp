@@ -19,10 +19,10 @@ Map* generateObstacles(Map* map){
     for(int i = 0 ; i < MAP_SIZE; i++ ){
         for(int k = 0 ; k < MAP_SIZE; k++){
             int value = rand()%5;
-            if(value == 0 || value == 1) {
+            if(value == 0 || value == 1 || value == 3) {
                 map->cells[i][k]->obstacle = new DestroyableObstacle();
             }
-            if(value == 2) {
+            if(value == 4) {
                 map->cells[i][k]->obstacle = new UndestroyableObstacle();
             }
         }
@@ -43,13 +43,34 @@ Map* generateCells(Map* map){
 Map* generatePlayers(Map* map){
     for(int i = 0 ; i < PLAYERS_QUANTITY ; i++){
         Player* player = new Player();
-//        player->position->x = map->cells[2][3]->center->x;
-//        player->position->y = map->cells[2][3]->center->y;
         player->position->x = map->cells[(i%2)*(MAP_SIZE-1)][((i/2)%2)*(MAP_SIZE-1)]->center->x;
         player->position->y = map->cells[(i%2)*(MAP_SIZE-1)][((i/2)%2)*(MAP_SIZE-1)]->center->y;
         map->players.push_back(player);
         player->id = i + 1;
+        int cellX = player->position->x/MAP_FIELD_SIZE;
+        int cellY = player->position->y/MAP_FIELD_SIZE;
+        clearFieldsForPlayers(map, cellX, cellY);
     }
 
     return map;
+}
+
+void clearFieldsForPlayers(Map* map, int cellX, int cellY){
+    map->cells[cellY][cellX]->obstacle = nullptr;
+    
+    if (cellX < MAP_SIZE - 2){
+        map->cells[cellY][cellX + 1]->obstacle = nullptr;
+    }
+
+    if (cellY < MAP_SIZE - 2){
+        map->cells[cellY + 1][cellX]->obstacle = nullptr;
+    }
+
+    if (cellX > 2){
+        map->cells[cellY][cellX - 1]->obstacle = nullptr;
+    }
+
+    if (cellY > 2){
+        map->cells[cellY - 1][cellX]->obstacle = nullptr;
+    }
 }
