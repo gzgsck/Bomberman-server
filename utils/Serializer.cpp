@@ -39,6 +39,10 @@ string serializePlayers(Map* map){
         players.append(",");
         players.append(to_string(p->avaliableBombs));
         players.append(",");
+        players.append(to_string(p->isProtected));
+        players.append(",");
+        players.append(to_string(p->resetPosition));
+        players.append(",");
         players.append(to_string(p->position->x));
         players.append(",");
         players.append(to_string(p->position->y));
