@@ -25,6 +25,7 @@ public:
     int lifes;
     bool isAlive;
     bool isActive;
+    bool resetPosition;
     Player();
     vector<Bomb*> bombs;
     int bombPower;

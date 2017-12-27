@@ -12,6 +12,7 @@ Player::Player() {
     this->isAlive = true;
     this->position = new Point();
     this->isActive = true;
+    this->resetPosition = false;
     this->bombPower = PLAYERS_START_BOMB_POWER;
 }
 
@@ -24,17 +25,14 @@ void Player::setSocket(sockaddr_in *sock) {
     this->socket.sin_port = sock->sin_port;
 }
 
-void Player::plantBomb(Bomb* bomb){
+void Player::plantBomb(Bomb* bomb) {
     this->bombs.push_back(bomb);
 }
 
-bool Player::isPlayerOnField(int x, int y){
-    int playerX = this->position->x/MAP_FIELD_SIZE;
-    int playerY = this->position->y/MAP_FIELD_SIZE;
-    if(playerX == x && playerY == y){
-        return true;
-    }
-    return false;
+bool Player::isPlayerOnField(int row, int col) {
+    int playerX = this->position->x / MAP_FIELD_SIZE;
+    int playerY = this->position->y / MAP_FIELD_SIZE;    
+    return playerX == col && playerY == row;
 }
 
 void Player::removeBomb(Bomb* bomb){

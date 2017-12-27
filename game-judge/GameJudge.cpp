@@ -57,24 +57,24 @@ void searchInRange(Map* map, int cellX, int cellY){
         killPlayerOnField(map, i, cellY);
     }
 
-    for(int i = cellY; i >= yU; i--){
-        if(map->cells[cellX][i]->bomb != nullptr){
+    for (int i = cellY; i >= yU; i--){
+        if (map->cells[cellX][i]->bomb != nullptr) {
             searchInRange(map, cellX, i);
             break;
         }
-        if(map->cells[cellX][i]->obstacle != nullptr){
+        if (map->cells[cellX][i]->obstacle != nullptr) {
             destroyObstacle(map, cellX, i);
             break;
         }
         killPlayerOnField(map, cellX, i);
     }
 
-    for(int i = cellY; i <= yD; i++){
-        if(map->cells[cellX][i]->bomb != nullptr){
+    for (int i = cellY; i <= yD; i++){
+        if (map->cells[cellX][i]->bomb != nullptr){
             searchInRange(map, cellX, i);
             break;
         }
-        if(map->cells[cellX][i]->obstacle != nullptr){
+        if (map->cells[cellX][i]->obstacle != nullptr){
             destroyObstacle(map, cellX, i);
             break;
         }
@@ -82,25 +82,19 @@ void searchInRange(Map* map, int cellX, int cellY){
     }
 }
 
-void destroyObstacle(Map* map, int x, int y){
-    cout<<"jazdaaaaaaaaaaaaaaa"<<x<<" "<<y<<endl;
-    if(map->cells[x][y]->obstacle->isDestroyable()){
-        cout<<"jazda"<<x<<" "<<y<<endl;
+void destroyObstacle(Map* map, int x, int y) {
+    if (map->cells[x][y]->obstacle->isDestroyable()) {
         map->cells[x][y]->obstacle = nullptr;
     }
 }
 
-void killPlayerOnField(Map* map, int x, int y){
-    for(int i = 0; i < map->players.size(); i++){
-        if(map->players.at(i)->isPlayerOnField(x,y)){
-            if(map->players.at(i)->lifes <= 1){
+void killPlayerOnField(Map* map, int row, int col) {
+    for (int i = 0; i < map->players.size(); i++) {
+        if (map->players.at(i)->isPlayerOnField(row, col)) {
+            map->players.at(i)->lifes -= 1;
+
+            if (map->players.at(i)->lifes < 1) {
                 map->players.at(i)->isAlive = false;
-                continue;
-            }
-            else{
-                map->players.at(i)->lifes-=1;
-                cout<<map->players.at(i)->lifes<<endl;
-                continue;
             }
         }
     }
