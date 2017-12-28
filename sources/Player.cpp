@@ -3,6 +3,7 @@
 //
 
 #include <cstring>
+#include <chrono>
 #include "../headers/Player.h"
 #include "../utils/Configuration.h"
 
@@ -15,6 +16,7 @@ Player::Player() {
     this->resetPosition = false;
     this->bombPower = PLAYERS_START_BOMB_POWER;
     this->isProtected = false;
+    this->protectionStartTime = 0;
 }
 
 void Player::setSocket(sockaddr_in *sock) {
@@ -44,4 +46,20 @@ void Player::removeBomb(Bomb* bomb){
         }
     }
     this->bombs.erase(bombs.begin() + i);
+}
+
+void Player::checkProtection(){
+    if(isProtected == false){
+        return;
+    }
+    else{
+        if(this->protectionStartTime + PROTECTION_DURATION < chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()){
+            this->isProtected = false;
+        }
+    }
+}
+
+void Player::setProtection() {
+    this->protectionStartTime = chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    this->isProtected = true;
 }

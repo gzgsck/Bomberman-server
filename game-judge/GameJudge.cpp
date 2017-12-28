@@ -5,6 +5,11 @@
 #include <chrono>
 #include "GameJudge.h"
 
+void managePlayers(Map* map){
+    for(int i = 0 ; i < map->players.size(); i++){
+        map->players.at(i)->checkProtection();
+    }
+}
 
 void manageBombsExplosions(Map* map) {
     for(int i = 0; i < MAP_SIZE; i++){
@@ -125,7 +130,7 @@ void killPlayerOnField(Map* map, int row, int col) {
             if (player->lifes < 1) {
                 player->isAlive = false;
             }
-            player->isProtected = true;
+            player->setProtection();
         }
     }
 }

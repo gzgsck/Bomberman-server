@@ -18,6 +18,7 @@ void *diffThread(void*){
         sleep(0.5);
         manageBombsExplosions(map);
         manageFires(map);
+        managePlayers(map);
     }
 }
 

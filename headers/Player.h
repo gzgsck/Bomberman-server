@@ -20,6 +20,8 @@ public:
     void plantBomb(Bomb* bomb);
     bool isPlayerOnField(int x, int y);
     void removeBomb(Bomb* bomb);
+    void checkProtection();
+    void setProtection();
     Point* position;
     int id;
     string name = "";
@@ -28,6 +30,7 @@ public:
     bool isAlive;
     bool isActive;
     bool resetPosition;
+    long protectionStartTime;
     bool isProtected;
     Player();
     vector<Bomb*> bombs;

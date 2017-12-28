@@ -58,7 +58,6 @@ Player* Map::findPlayerBySocaddr(sockaddr_in* sock){
 
 void Map::setPlayerMove(sockaddr_in* sock, int x, int y) {
     Player* player = this->findPlayerBySocaddr(sock);
-
     player->resetPosition = !this->canMoveTo(player, x, y);
 
     if (player->resetPosition) {
@@ -80,11 +79,9 @@ void Map::setPlayerMove(sockaddr_in* sock, int x, int y) {
     player->position->x = x;
 }
 
-// todo change after changes in coords
 bool Map::canMoveTo(Player* player, int x , int y) {
     Cell* cell = getCellByPosition(x/MAP_FIELD_SIZE, y/MAP_FIELD_SIZE);
-
-    if(player->position->x/MAP_FIELD_SIZE == x/MAP_FIELD_SIZE && player->position->y == y/MAP_FIELD_SIZE){
+    if(player->position->x/MAP_FIELD_SIZE == x/MAP_FIELD_SIZE && player->position->y/MAP_FIELD_SIZE == y/MAP_FIELD_SIZE){
        return true;
     }
     if(cell->obstacle != nullptr || cell->bomb!= nullptr){

@@ -13,6 +13,7 @@ void manageFires(Map* map);
 void searchInRange(Map* map, int cellX, int cellY);
 void destroyObstacle(Map* map, int x, int y);
 void killPlayerOnField(Map* map, int x, int y);
+void managePlayers(Map* map);
 
 
 #endif //PROJECTBOOM_GAMEJUDGE_H
