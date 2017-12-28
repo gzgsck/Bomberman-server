@@ -72,19 +72,20 @@ void Map::setPlayerMove(sockaddr_in* sock, int x, int y) {
             if (player->lifes < 1) {
                 player->isAlive = false;
             }
-            player->isProtected = true;
+            player->setProtection();
         }
     }
+
     player->position->y = y;
     player->position->x = x;
 }
 
 bool Map::canMoveTo(Player* player, int x , int y) {
     Cell* cell = getCellByPosition(x/MAP_FIELD_SIZE, y/MAP_FIELD_SIZE);
-    if(player->position->x/MAP_FIELD_SIZE == x/MAP_FIELD_SIZE && player->position->y/MAP_FIELD_SIZE == y/MAP_FIELD_SIZE){
+    if (player->position->x/MAP_FIELD_SIZE == x/MAP_FIELD_SIZE && player->position->y/MAP_FIELD_SIZE == y/MAP_FIELD_SIZE){
        return true;
     }
-    if(cell->obstacle != nullptr || cell->bomb!= nullptr){
+    if (cell->obstacle != nullptr || cell->bomb != nullptr){
         return false;
     }
     return true;

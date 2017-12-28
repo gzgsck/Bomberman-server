@@ -31,8 +31,9 @@ void manageFires(Map* map) {
         for(int k = 0 ; k < MAP_SIZE; k++){
             if(map->cells[i][k]->fire == nullptr){ continue;}
             else{
-                long serverTime = chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
                 Fire* fire = map->cells[i][k]->fire;
+                long serverTime = chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
                 if (fire->timestamp + fire->durationTime <= serverTime) {
                     delete fire;
                     map->cells[i][k]->fire = nullptr;
@@ -52,7 +53,7 @@ void searchInRange(Map* map, int cellX, int cellY){
 
 
     map->cells[cellX][cellY]->bomb = nullptr;
-    map->cells[cellX][cellY]->fire = new Fire(1000);
+    map->cells[cellX][cellY]->fire = new Fire(1100);
     bomb->owner->removeBomb(bomb);
 
     for (int i = cellX; i <= xR; i++) {
@@ -64,7 +65,7 @@ void searchInRange(Map* map, int cellX, int cellY){
             destroyObstacle(map, i, cellY);
             break;
         }
-        map->cells[i][cellY]->fire = new Fire(1000);
+        map->cells[i][cellY]->fire = new Fire(1100);
 
         killPlayerOnField(map, i, cellY);
     }
@@ -78,7 +79,7 @@ void searchInRange(Map* map, int cellX, int cellY){
             destroyObstacle(map, i, cellY);
             break;
         }
-        map->cells[i][cellY]->fire = new Fire(1000);
+        map->cells[i][cellY]->fire = new Fire(1100);
 
         killPlayerOnField(map, i, cellY);
     }
@@ -92,7 +93,7 @@ void searchInRange(Map* map, int cellX, int cellY){
             destroyObstacle(map, cellX, i);
             break;
         }
-        map->cells[i][cellY]->fire = new Fire(1000);
+        map->cells[cellX][i]->fire = new Fire(1100);
 
         killPlayerOnField(map, cellX, i);
     }
@@ -106,7 +107,7 @@ void searchInRange(Map* map, int cellX, int cellY){
             destroyObstacle(map, cellX, i);
             break;
         }
-        map->cells[i][cellY]->fire = new Fire(1000);
+        map->cells[cellX][i]->fire = new Fire(1100);
 
         killPlayerOnField(map, cellX, i);
     }
