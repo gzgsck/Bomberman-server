@@ -25,39 +25,19 @@ int Map::checkIsOnPlayersList(string name){
     return -1;
 }
 
-int Map::addPlayersNameToList(string name, sockaddr_in* sock){
+int Map::addPlayersNameToList(string name) {
     if (checkAllPlayersHaveName()) {
         return -1;
     }
     for(int i = 0; i < this->players.size(); i++){
         if(this->players.at(i)->name.size()<1){
             this->players.at(i)->name = name;
-            this->players.at(i)->setSocket(sock);
             return i;
         }
     }
 }
 
-void Map::setPlayerTimeResponse(sockaddr_in* sock){
-    Player* p = findPlayerBySocaddr(sock);
-    if(p != nullptr) {
-        p->lastResponseTime = chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now().time_since_epoch()).count();
-    }
-}
-
-Player* Map::findPlayerBySocaddr(sockaddr_in* sock){
-    for(int i = 0 ; i < this->players.size(); i++){
-        if(this->players.at(i)->socket.sin_addr.s_addr == sock->sin_addr.s_addr && this->players.at(i)->socket.sin_port == sock->sin_port){
-            return this->players.at(i);
-        }
-    }
-    return nullptr ;
-}
-
-
-void Map::setPlayerMove(sockaddr_in* sock, int x, int y) {
-    Player* player = this->findPlayerBySocaddr(sock);
+void Map::setPlayerMove(Player* player, int x, int y) {
     player->resetPosition = !this->canMoveTo(player, x, y);
 
     if (player->resetPosition) {
@@ -91,8 +71,7 @@ bool Map::canMoveTo(Player* player, int x , int y) {
     return true;
 }
 
-void Map::setBombPlant(sockaddr_in* sock, int x, int y){
-    Player* player = this->findPlayerBySocaddr(sock);
+void Map::setBombPlant(Player* player, int x, int y){
     Cell* cell = getCellByPosition(x, y);
     if(canPlantBomb(player, cell) == false){
         return;

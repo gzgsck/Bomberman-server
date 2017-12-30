@@ -1,7 +1,7 @@
 //
 // Created by grzegorz on 18.11.17.
 //
-
+#include <vector>
 #include <chrono>
 #include "ServerUDP.h"
 #include "Serializer.h"
@@ -13,29 +13,83 @@ void sendBombs(int socket, Map* map, sockaddr_in addr);
 void sendPlayers(int socket, Map* map, sockaddr_in client);
 void sendObstacles(int socket, Map* map, sockaddr_in client);
 void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]);
-string deserializeProbeRequest(char tab[]);
 void sendMapForAllPlayers(int socket, Map* map);
-void sendPong(int socket, sockaddr_in clientAddr, Map* map, char buffer[]);
-void deserializeBomb(char buffer[], Map* map, sockaddr_in clientAddr);
-void deserializeMove(char tab[], Map* map, sockaddr_in clientAddr);
+void sendPong(int socket, sockaddr_in clientAddr, char buffer[]);
+
+class Connection {
+    public: 
+        sockaddr_in address;
+        Player* player;
+        Map* map;
+        int lastReceiveTime;
+
+        Connection(sockaddr_in* address) {
+            memset(&this->address, 0, sizeof(struct sockaddr_in));
+            this->address.sin_addr = address->sin_addr;
+            this->address.sin_addr.s_addr = address->sin_addr.s_addr;
+            this->address.sin_family = address->sin_family;
+            this->address.sin_port = address->sin_port;
+            map = nullptr;
+            player = nullptr;
+        }
+        
+        void setNowLastReceive() {
+            lastReceiveTime = chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+        }
+   
+};
+
+void handleConnected(Connection* connection, int serverSocket, char message[]);
+void handleNotConnected(int serverSocket, sockaddr_in clientAddr, char message[]);
+
+std::vector<Map*> maps = {};
+std::vector<Connection*> connections = {};
 
 
-int connection(Map* map )
-{
+
+Connection* existConnectionForName(string name) {
+    for (Connection* connection : connections) {
+        bool exist = connection->player->name == name;
+        if (exist) return connection;
+    }
+    return nullptr;
+}
+
+Connection* existConnectionForAddress(sockaddr_in* incomming) {
+    for (Connection* connection : connections) {
+        if (connection->address.sin_addr.s_addr == incomming->sin_addr.s_addr &&
+            connection->address.sin_port == incomming->sin_port
+        ){
+            return connection;
+        }
+    }
+    return nullptr;
+    
+}
+
+
+// void* singleGameManager(void* params) {
+//     while(true) {
+//         sleep(0.5);
+//         manageBombsExplosions(map);
+//         manageFires(map);
+//         managePlayers(map);
+//     }
+// }
+
+int createSocket() {
     int nSocket;
     int nBind;
     int nFoo = 1;
-    socklen_t nTmp;
-    struct sockaddr_in stAddr, stClientAddr;
+    struct sockaddr_in stAddr;
 
 
-    /* address structure */
     memset(&stAddr, 0, sizeof(struct sockaddr));
     stAddr.sin_family = AF_INET;
     stAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     stAddr.sin_port = htons(SERVER_PORT);
 
-    /* create a socket */
     nSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (nSocket < 0)
     {
@@ -46,65 +100,90 @@ int connection(Map* map )
 
     setsockopt(nSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&nFoo, sizeof(nFoo));
 
-    //non blocking
-   struct timeval read_timeout;
-   read_timeout.tv_sec = 0;
-   read_timeout.tv_usec = 10;
-   setsockopt(nSocket, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
-    /* bind a name to a socket */
+    struct timeval read_timeout;
+    read_timeout.tv_sec = 0;
+    read_timeout.tv_usec = 10;
+    setsockopt(nSocket, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
+
     nBind = bind(nSocket, (struct sockaddr*)&stAddr, sizeof(struct sockaddr));
     if (nBind < 0)
     {
         fprintf(stderr," Can't bind a name to a socket.\n");
         exit(1);
     }
+    return nSocket;
+}
 
-    int iter = 0; 
+int startServer() {
+    int serverSocket = createSocket();
+    struct sockaddr_in stClientAddr;
+    socklen_t structureSize = sizeof(struct sockaddr);
+    int bufferSize = 500;
+
+
     while(1)
-    {
-        nTmp = sizeof(struct sockaddr);
-        int n = 500;
-        char buffer[n];
+    {   
+        char buffer[bufferSize];
 
-        if (map->checkAllPlayersHaveName()) {
-            //todo odpowiedzi gracza
-            sendMapForAllPlayers(nSocket, map);
-        }
-        if (iter % 100 == 0) {
-            for (int i = 0; i < map->players.size(); i++) {
-                Player* player = map->players.at(i);
-                if (player->name.size() > 0) {
-                    int gameStatus =  map->checkAllPlayersHaveName() ? 0 : -1;
-                    
-                    struct sockaddr* address = (struct sockaddr*)&player->socket;
-                    socklen_t len = sizeof(player->socket);
-                    string o = serializeToTableOfPlayers(map, gameStatus, player);
-                    char buffer[o.length()];
-                    strcpy(buffer, o.c_str());
-                    sendto(nSocket, buffer, o.length(), 0, address, len);
-                }
-            }
-        }
-        
-        int length = recvfrom(nSocket, buffer, n, 0, (struct sockaddr*)&stClientAddr, &nTmp);
+        int length = recvfrom(serverSocket, buffer, bufferSize, 0, (struct sockaddr*)&stClientAddr, &structureSize);
+
         if (length > 0) {
-            if (buffer[0] == 'p' && buffer[1] == 'r') {
-                probeRequest(nSocket, map, stClientAddr, buffer);
-            }
-            if (buffer[0] == 'p' && buffer[1] == 'i') {
-                sendPong(nSocket, stClientAddr, map, buffer);
-            }
+            Connection* incomming = existConnectionForAddress(&stClientAddr);
 
-            if (buffer[0] == 'm' && buffer[1] == 'v') {
-                deserializeMove(buffer, map, stClientAddr);
-            }
-            if (buffer[0] == 'b' && buffer[1] == 'm') {
-                deserializeBomb(buffer, map, stClientAddr);
+            if (incomming != nullptr) {
+                handleConnected(incomming, serverSocket, buffer);
+            } else {
+                handleNotConnected(serverSocket, stClientAddr, buffer);
             }
         }
-        iter = (iter + 1) % 10000;
+    }
+}
+
+void sendAcknownladge(int serverSocket, int sequenceLength, int sequenceStart, char message[], sockaddr_in clientAddress) {
+    char uniqueSequence[22];
+    uniqueSequence[0] = 'a';
+    uniqueSequence[1] = 'c';
+    strncpy(uniqueSequence + 2, message + sequenceStart, sequenceLength);
+    sendto(
+        serverSocket,
+        uniqueSequence,
+        sequenceLength + 2,
+        0,
+        (struct sockaddr*)&clientAddress,
+        sizeof(clientAddress)
+    );
+}
+
+void handleConnected(Connection* connection, int serverSocket, char message[]) {
+    connection->setNowLastReceive();
+    sockaddr_in clientAddr = connection->address;
+  
+    if (message[0] == 'p' && message[1] == 'i') {
+        sendPong(serverSocket, connection->address, message);
     }
 
+
+    Map *map = connection->map;
+    Player *player = connection->player;
+
+    if (message[0] == 'p' && message[1] == 'r') {
+        probeRequest(serverSocket, map, clientAddr, message);
+    }
+    if (message[0] == 'm' && message[1] == 'v') {
+        deserializeMove(message, map, player);
+    }
+    if (message[0] == 'b' && message[1] == 'm') {
+        deserializeBomb(message, map, player);
+    }
+}
+
+void handleNotConnected(int serverSocket, sockaddr_in clientAddr, char message[]) {
+    if (message[0] == 'c' && message[1] == 'n') {
+        connections.push_back(new Connection(&clientAddr));
+        sendAcknownladge(serverSocket, 20, 2, message, clientAddr);
+    } else {
+        cout << "Reciving message different then connection request from not connected client" << endl; 
+    }
 }
 
 void sendBombs(int socket, Map* map, sockaddr_in clientAddr){
@@ -123,7 +202,8 @@ void sendObstacles(int socket, Map* map, sockaddr_in clientAddr){
     return;
 }
 
-void sendPlayers(int socket, Map* map, sockaddr_in clientAddr){
+void sendPlayers(int socket, Map* map, Connection *connection) {
+    sockaddr_in clientAddr = connection->address;
     string o = serializePlayers(map);
     char buffer[o.length()];
     strcpy(buffer, o.c_str());
@@ -136,18 +216,20 @@ void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]){
     string o;
     int idx = map->checkIsOnPlayersList(name);
     if (idx == -1) {
-        idx = map->addPlayersNameToList(name, &clientAddr);
+        idx = map->addPlayersNameToList(name);
         if (idx == -1) {
             o = "pr:-2";
             char buffer[o.length()];
             strcpy(buffer, o.c_str());
-            sendto(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+            sendto(socket, buffer, o.length(), 0, (struct sockaddr*)&clientAddr, sizeof(clientAddr));
             return;
-        };
-    } else {
-        if (map->players.at(idx)->socket.sin_addr.s_addr == clientAddr.sin_addr.s_addr) {
-            map->players.at(idx)->setSocket(&clientAddr);
+        } else {
+
         }
+    } else {
+        // if (map->players.at(idx)->socket.sin_addr.s_addr == clientAddr.sin_addr.s_addr) {
+        //     map->players.at(idx)->setSocket(&clientAddr);
+        // }
     }
 
     Player* player = map->players.at(idx);
@@ -162,16 +244,15 @@ void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]){
 }
 
 // different thread
-void sendMapForAllPlayers(int socket, Map* map){
-        for (int i = 0; i < map->players.size(); i++) {
-            sendPlayers(socket, map, map->players.at(i)->socket);
-            sendObstacles(socket, map, map->players.at(i)->socket);
-            sendBombs(socket, map, map->players.at(i)->socket);
-        }
-}
+// void sendMapForAllPlayers(int socket, Map* map){
+//     for (int i = 0; i < map->players.size(); i++) {
+//         sendPlayers(socket, map, map->players.at(i)->socket);
+//         sendObstacles(socket, map, map->players.at(i)->socket);
+//         sendBombs(socket, map, map->players.at(i)->socket);
+//     }
+// }
 
-void sendPong(int socket, sockaddr_in clientAddr, Map* map, char buffer[]){
-    map->setPlayerTimeResponse(&clientAddr);
+void sendPong(int socket, sockaddr_in clientAddr, char buffer[]) {
     sendto(socket, buffer, strlen(buffer), 0, (struct sockaddr *) &clientAddr, sizeof(clientAddr));
     return;
 }

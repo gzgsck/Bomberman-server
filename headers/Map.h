@@ -23,12 +23,10 @@ public:
     Cell* cells[MAP_SIZE][MAP_SIZE];
     bool checkAllPlayersHaveName();
     int checkIsOnPlayersList(string name);
-    int addPlayersNameToList(string name, sockaddr_in* sock);
+    int addPlayersNameToList(string name);
     bool checkPlayerRequests(string name);
-    void setPlayerTimeResponse(sockaddr_in* sock);
-    Player* findPlayerBySocaddr(sockaddr_in* sock);
-    void setPlayerMove(sockaddr_in* sock, int x, int y);
-    void setBombPlant(sockaddr_in* sock, int x, int y);
+    void setPlayerMove(Player* player, int x, int y);
+    void setBombPlant(Player* player, int x, int y);
     Cell* getCellByPosition(int x, int y);
     bool canPlantBomb(Player* player, Cell* cell);
     bool canMoveTo(Player* player, int x , int y);

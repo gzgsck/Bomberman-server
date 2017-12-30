@@ -16,7 +16,6 @@ class Fire;
 class Player {
 
 public:
-    void setSocket(sockaddr_in* sock);
     void plantBomb(Bomb* bomb);
     bool isPlayerOnField(int x, int y);
     void removeBomb(Bomb* bomb);
@@ -35,9 +34,6 @@ public:
     Player();
     vector<Bomb*> bombs;
     int bombPower;
-    int lastResponseTime;
-    sockaddr_in socket;
-
 };
 
 

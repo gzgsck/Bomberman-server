@@ -11,22 +11,7 @@
 
 using namespace std;
 
-std::atomic<Map*> map;
-
-void *diffThread(void*){
-    while(true) {
-        sleep(0.5);
-        manageBombsExplosions(map);
-        manageFires(map);
-        managePlayers(map);
-    }
-}
-
 int main() {
-    map = generateMap();
-
-    pthread_t thread;
-    pthread_create(&thread, NULL, diffThread, NULL);
-    connection(map);
+    startServer();
     return 0;
 }

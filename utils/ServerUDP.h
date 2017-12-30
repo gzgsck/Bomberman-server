@@ -21,7 +21,7 @@
 #include "../headers/Map.h"
 #include "../headers/Player.h"
 
-int connection(Map* map);
+int startServer();
 void sendBombs(int socket, Map* map, sockaddr_in client);
 void sendPlayers(int socket, Map* map, sockaddr_in client);
 void sendObstacles(int socket, Map* map, sockaddr_in client);

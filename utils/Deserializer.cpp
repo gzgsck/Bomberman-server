@@ -17,7 +17,7 @@ string deserializeProbeRequest(char tab[] ){
     return name;
 }
 
-void deserializeMove(char buffer[], Map* map, sockaddr_in clientAddr) {
+void deserializeMove(char buffer[], Map* map, Player* player) {
     string bombs;
     bombs = std::string(buffer, 10);
     char tab[4];
@@ -26,21 +26,17 @@ void deserializeMove(char buffer[], Map* map, sockaddr_in clientAddr) {
     int *x = (int *) tab;
     strncpy(tab2, buffer + 6, 4);
     int *y = (int *) tab2;
-    map->setPlayerMove(&clientAddr, *x, *y);
+    map->setPlayerMove(player, *x, *y);
 }
 
-void deserializeBomb(char buffer[], Map* map, sockaddr_in clientAddr){
-
-    string bombs;
-    bombs = std::string(buffer, 10);
-
+void deserializeBomb(char buffer[], Map* map, Player* player) {
     char tab[4];
     char tab2[4];
     strncpy(tab, buffer + 2, 4);
     int x = *((int*)tab);
     strncpy(tab2, buffer + 6, 4);
     int y =*((int*)tab2);
-    map->setBombPlant(&clientAddr, x, y);
+    map->setBombPlant(player, x, y);
 
 }
 
