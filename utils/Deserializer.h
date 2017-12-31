@@ -8,9 +8,9 @@
 #include <iostream>
 #include "../headers/Map.h"
 
-string deserializeProbeRequest(char tab[]);
+string deserializeName(char message[]);
 void deserializeMove(char buffer[], Map* map, Player* player);
 void deserializeBomb(char buffer[], Map* map, Player* player);
-
+int deserializeMapId(char message[]);
 
 #endif //PROJECTBOOM_DESERIALIZER_H

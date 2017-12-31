@@ -20,12 +20,13 @@
 #include <time.h>
 #include "../headers/Map.h"
 #include "../headers/Player.h"
+#include "../map-generator/MapGenerator.h"
+#include "../game-judge/GameJudge.h"
 
 int startServer();
 void sendBombs(int socket, Map* map, sockaddr_in client);
 void sendPlayers(int socket, Map* map, sockaddr_in client);
 void sendObstacles(int socket, Map* map, sockaddr_in client);
-void probeRequest(int socket, Map* map, sockaddr_in clientAddr, char tab[]);
 void sendMapForAllPlayers(int socket, Map* map);
 void sendPong(int socket, sockaddr_in clientAddr, Map* map, char tab[]);
 #endif //PROJECTBOOM_SERVERUDP_H

@@ -6,15 +6,19 @@
 #include "Deserializer.h"
 #include "ServerUDP.h"
 
-string deserializeProbeRequest(char tab[] ){
-    int size = (int)tab[2] - 48;
+string deserializeName(char message[]) {
+    int size = (int)message[2] - 48;
     char returnedValue[size];
-    for(int i = 0; i < size; i++){
-        returnedValue[i] = tab[i+4];
-    }
-    string name;
-    name = std::string(returnedValue, size);
+    strncpy(returnedValue, message+4, size);
+    string name = std::string(returnedValue, size);
     return name;
+}
+
+int deserializeMapId(char message[]) {
+    int size = ((int)message[2] - 48) + 4;
+    char intBites[4];
+    strncpy(intBites, message + size, 4);
+    return *((int*) intBites);
 }
 
 void deserializeMove(char buffer[], Map* map, Player* player) {

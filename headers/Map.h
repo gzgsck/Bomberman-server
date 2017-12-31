@@ -19,6 +19,8 @@ class Fire;
 class Map {
 
 public:
+    int id;
+    string status;
     vector<Player*> players;
     Cell* cells[MAP_SIZE][MAP_SIZE];
     bool checkAllPlayersHaveName();
