@@ -4,6 +4,7 @@
 #include <vector>
 #include <chrono>
 #include <algorithm>
+#include <unistd.h>
 #include "ServerUDP.h"
 #include "Serializer.h"
 #include "Deserializer.h"
@@ -133,6 +134,8 @@ void handleConnected(Connection* connection, int serverSocket, char message[], i
 void handleNotConnected(int serverSocket, sockaddr_in clientAddr, char message[], int messageLength);
 
 std::vector<Map*> pendingGames = {};
+std::vector<Map*> allGames = {};
+
 std::vector<Connection*> connections = {};
 LookupTable* lt = new LookupTable();
 
@@ -163,7 +166,18 @@ Connection* existConnectionForAddress(sockaddr_in* incomming) {
     
 }
 
-
+void* singleGameRoutine(void* param) {
+    // int mapId = *((int*) param);
+    // Map *map = find_if(allGames.begin(), allGames.end(), [&mapId](Map* m) {
+    //     return m->id = mapId;
+    // });
+    Map *map = (Map*) param;
+    cout << "Starting thread for map:" << map->id << endl;
+    while(true) {
+        usleep(200000);
+        cout << "singleGameRoutine" << map->id << endl;
+    }
+}
 // void* singleGameManager(void* params) {
 //     while(true) {
 //         sleep(0.5);
@@ -305,7 +319,7 @@ void handleNotConnected(int serverSocket, sockaddr_in clientAddr, char message[]
     }
 }
 
-void sendBombs(int socket, Map* map, sockaddr_in clientAddr){
+void sendBombs(int socket, Map* map, sockaddr_in clientAddr) {
     string o = serializeBombs(map);
     char buffer[o.length()];
     strcpy(buffer, o.c_str());
@@ -313,7 +327,7 @@ void sendBombs(int socket, Map* map, sockaddr_in clientAddr){
     return;
 }
 
-void sendObstacles(int socket, Map* map, sockaddr_in clientAddr){
+void sendObstacles(int socket, Map* map, sockaddr_in clientAddr) {
     string o = serializeObstacles(map);
     char buffer[o.length()];
     strcpy(buffer, o.c_str());
@@ -340,7 +354,11 @@ bool createGame(Connection* connection, string name) {
     connection->player = map->players.at(playerId);
     connection->map = map;
     pendingGames.push_back(map);
-    return true;
+    allGames.push_back(map);
+    cout << "Starting thread for: " << map->id << endl;
+    pthread_t gameThread;
+    
+return pthread_create(&gameThread, 0, &singleGameRoutine, map) == 0;
 }
 
 bool joinGame(Connection* connection, string name, int id) {
@@ -348,6 +366,18 @@ bool joinGame(Connection* connection, string name, int id) {
 
     Map* map = findGameById(id);
     if (map == nullptr) return false;
+    if (map->checkIsOnPlayersList(name) != -1) return false;
+    int playerId = map->addPlayersNameToList(name);
+    connection->player = map->players.at(playerId);
+    connection->map = map;
+
+    if (map->checkAllPlayersHaveName()) {
+        map->status = "inprogress";
+        pendingGames.erase(std::remove(pendingGames.begin(), pendingGames.end(), map), pendingGames.end());
+    }
+
+    return true;
+
 }
 
 void probeRequest(int socket, Connection* connection, char message[], int messageLength) {
@@ -367,7 +397,9 @@ void probeRequest(int socket, Connection* connection, char message[], int messag
 
             lt->add(message, messageLength, response, responseLength, &client);
 
-            sendto(socket, response, responseLength, 0,(struct sockaddr*)&client, sizeof(client));
+            sendto(socket, response, responseLength, 0, (struct sockaddr*)&client, sizeof(client));
+        } else {
+            cout << "Not allowed" << endl;
         }
     } else {
         bool success = joinGame(connection, name, id);
@@ -379,6 +411,8 @@ void probeRequest(int socket, Connection* connection, char message[], int messag
             lt->add(message, messageLength, response, responseLength, &client);
 
             sendto(socket, response, responseLength, 0,(struct sockaddr*)&client, sizeof(client));
+        } else {
+            cout << "Not allowed" << endl;
         }
     }
     // string o;
