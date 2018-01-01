@@ -5,9 +5,18 @@
 #include <netinet/in.h>
 #include <chrono>
 #include "../headers/Map.h"
+#define MAX 500
+
+Map::Map() {
+    this->semaphore = semget(IPC_PRIVATE, 1, IPC_CREAT|0600);
+    if (semctl(semaphore, 0, SETVAL, (int)1) == -1) {
+      perror("Nadanie wartosci semaforowi Map");
+      exit(1);
+    }
+}
 
 
-bool Map::checkAllPlayersHaveName(){
+bool Map::checkAllPlayersHaveName() {
     for(int i = 0 ; i < this->players.size(); i++){
         if((this->players.at(i)->name.compare("") == 0 )){
             return false;
@@ -16,7 +25,7 @@ bool Map::checkAllPlayersHaveName(){
     return true;
 }
 
-int Map::checkIsOnPlayersList(string name){
+int Map::checkIsOnPlayersList(string name) {
     for (int i = 0 ; i< this->players.size(); i++){
         if(this->players.at(i)->name.compare(name) == 0){
             return i;
@@ -71,7 +80,7 @@ bool Map::canMoveTo(Player* player, int x , int y) {
     return true;
 }
 
-void Map::setBombPlant(Player* player, int x, int y){
+void Map::setBombPlant(Player* player, int x, int y) {
     Cell* cell = getCellByPosition(x, y);
     if(canPlantBomb(player, cell) == false){
         return;
@@ -83,7 +92,7 @@ void Map::setBombPlant(Player* player, int x, int y){
 }
 
 bool Map::canPlantBomb(Player* player, Cell* cell){
-    if(player->avaliableBombs - player->bombs.size() <= 0){
+    if(player->avaliableBombs - player->bombs.size() <= 0) {
         cout << "No more bombs" << endl;
         return false;
     }
@@ -97,6 +106,6 @@ bool Map::canPlantBomb(Player* player, Cell* cell){
     return true;
 }
 
-Cell* Map::getCellByPosition(int x, int y){
+Cell* Map::getCellByPosition(int x, int y) {
     return this-> cells[y][x];
 }

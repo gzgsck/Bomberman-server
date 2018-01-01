@@ -6,4 +6,7 @@
 
 Cell::Cell(Point* point) {
     center = point;
+    fire = nullptr;
+    bomb = nullptr;
+    obstacle = nullptr;
 }

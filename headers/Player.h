@@ -12,16 +12,18 @@ using namespace std;
 class Point;
 class Bomb;
 class Fire;
+class Connection;
 
 class Player {
-
 public:
     void plantBomb(Bomb* bomb);
     bool isPlayerOnField(int x, int y);
     void removeBomb(Bomb* bomb);
     void checkProtection();
     void setProtection();
+    void setConnection(Connection *connection);
     Point* position;
+    Connection* connection;
     int id;
     string name = "";
     int avaliableBombs;
@@ -32,6 +34,7 @@ public:
     long protectionStartTime;
     bool isProtected;
     Player();
+
     vector<Bomb*> bombs;
     int bombPower;
 };

@@ -1,1 +1,1 @@
-cmake . && make && ./PROJECTBOOM
+cmake . && make && gdb ./PROJECTBOOM

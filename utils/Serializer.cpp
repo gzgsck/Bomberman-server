@@ -54,12 +54,15 @@ string serializePlayers(Map* map){
     return players;
 }
 
-string serializeBombs(Map* map){
+string serializeBombs(Map* map) {
     int bombsQuantity = 0;
     string bombs = "";
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int k = 0; k < MAP_SIZE; k++) {
             if (map->cells[i][k]->bomb != nullptr) {
+                if (map->cells[i][k]->bomb->owner == nullptr) {
+                    
+                }
                 bombsQuantity++;
                 bombs.append(to_string(i*MAP_SIZE + (k)));
                 bombs.append(",");
@@ -95,7 +98,6 @@ string serializeToTableOfPlayers(Map* map, int status, Player* player) {
         players.append(to_string(p->id));
         players.append(",");
         players.append(p->name);
-
     }
     return players;
 }

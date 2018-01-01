@@ -19,6 +19,9 @@ Player::Player() {
     this->protectionStartTime = 0;
 }
 
+void Player::setConnection(Connection *connection) {
+    this->connection = connection;
+}
 void Player::plantBomb(Bomb* bomb) {
     this->bombs.push_back(bomb);
 }

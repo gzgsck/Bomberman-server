@@ -8,6 +8,7 @@
 #include "Cell.h"
 #include "Fire.h"
 #include "../utils/Configuration.h"
+#include "Semaphore.h"
 
 using namespace std;
 
@@ -19,7 +20,9 @@ class Fire;
 class Map {
 
 public:
+    Map();
     int id;
+    int semaphore;
     string status;
     vector<Player*> players;
     Cell* cells[MAP_SIZE][MAP_SIZE];
