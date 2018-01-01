@@ -165,6 +165,8 @@ int startServer() {
     {   
         char buffer[bufferSize];
 
+        lt->removeOutdated();
+
         int length = recvfrom(serverSocket, buffer, bufferSize, 0, (struct sockaddr*)&stClientAddr, &structureSize);
         
         if (length > 0) {
@@ -235,6 +237,13 @@ void handleConnected(Connection* connection, int serverSocket, char message[], i
             cout << "Receiving move request but not active game for connection" << endl;
         } else {
             deserializeBomb(message, map, player);
+            char response[500];
+            getAcknownladge(20, 10, message, response);
+            int responseLength = strlen(response);
+
+            lt->add(message, messageLength, response, responseLength, &clientAddr);
+            sendOnSocket(serverSocket, response, responseLength, 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+
         }
     }
 }
