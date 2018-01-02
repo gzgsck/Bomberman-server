@@ -2,6 +2,7 @@
 #define PROJECTBOOM_MAP_H
 #include <iostream>
 #include <vector>
+#include <stdlib.h>
 #include "Player.h"
 #include "Obstacle.h"
 #include "Bomb.h"
@@ -17,11 +18,16 @@ class Obstacle;
 class Bomb;
 class Fire;
 
+extern int NAMES_LENGTH;
+extern string NAMES[];
+
+
 class Map {
 
 public:
     Map();
     int id;
+    string name;
     int semaphore;
     string status;
     vector<Player*> players;

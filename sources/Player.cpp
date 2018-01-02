@@ -17,6 +17,7 @@ Player::Player() {
     this->bombPower = PLAYERS_START_BOMB_POWER;
     this->isProtected = false;
     this->protectionStartTime = 0;
+    this->connection = nullptr;
 }
 
 void Player::setConnection(Connection *connection) {

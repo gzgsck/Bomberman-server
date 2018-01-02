@@ -66,7 +66,7 @@ void LookupTable::search(char retryRequest[], int retryRequestLength, char respo
 
 void LookupTable::removeOutdated() {
     vector<LookupRecord*> newRecords;
-    auto it = std::remove_copy_if(records.begin(), records.end(), std::back_inserter(newRecords), [](LookupRecord* record) {
+    auto it = std::copy_if(records.begin(), records.end(), std::back_inserter(newRecords), [](LookupRecord* record) {
         return !record->isOutdated();
     });
     this->records = newRecords;

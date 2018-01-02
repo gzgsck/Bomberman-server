@@ -7,7 +7,17 @@
 #include "../headers/Map.h"
 #define MAX 500
 
+
+
 Map::Map() {
+    int i;
+    do {
+        i = rand() % NAMES_LENGTH;
+    } while(NAMES[i].length() == 0);
+    
+    this->name = NAMES[i];
+    NAMES[i] = "";
+
     this->semaphore = semget(IPC_PRIVATE, 1, IPC_CREAT|0600);
     if (semctl(semaphore, 0, SETVAL, (int)1) == -1) {
       perror("Nadanie wartosci semaforowi Map");
@@ -109,3 +119,97 @@ bool Map::canPlantBomb(Player* player, Cell* cell){
 Cell* Map::getCellByPosition(int x, int y) {
     return this-> cells[y][x];
 }
+
+int NAMES_LENGTH = 89;
+string NAMES[] = {
+    "Greenspring",
+    "Wellspring",
+    "Hedgebourne",
+    "Fairdragon",
+    "Northnesse",
+    "Spellborough",
+    "Silversage",
+    "Lorwald",
+    "Icesage",
+    "Icemarble",
+    "Oldgold",
+    "Blueviolet",
+    "Fayhaven",
+    "Starryhall",
+    "Wellness",
+    "Stonespell",
+    "Shadowwyvern",
+    "Flowerdell",
+    "Merribush",
+    "Fogmere",
+    "Riverhedge",
+    "Roseby",
+    "Grasskeep",
+    "Bypond",
+    "Eastmallow",
+    "Lochbarrow",
+    "Southston",
+    "Wyvernholt",
+    "Dorcliff",
+    "Estermage",
+    "Silverglass",
+    "Fairshore",
+    "Pinedell",
+    "Mapleford",
+    "Castleedge",
+    "Wheatcliff",
+    "Esterloch",
+    "Brightdale",
+    "Starryshore",
+    "Fieldhollow",
+    "Westness",
+    "Marbleacre",
+    "Redholt",
+    "Marblefair",
+    "Lightwind",
+    "Greenmoor",
+    "Springhedge",
+    "Wyvernston",
+    "Elfbridge",
+    "Shoreley",
+    "Westercastle",
+    "Eriwald",
+    "Woodelf",
+    "Newmere",
+    "Lightlake",
+    "Newhall",
+    "Applecoast",
+    "Butterwall",
+    "Foghill",
+    "Redgrass",
+    "Butterriver",
+    "Highmere",
+    "Griffinham",
+    "Woodloch",
+    "Wolfbourne",
+    "Roseville",
+    "Oldbeach",
+    "Bymill",
+    "Silvershore",
+    "Marblelake",
+    "Jannesse",
+    "Waterbridge",
+    "Aelholt",
+    "Whiteby",
+    "Springpond",
+    "Clearfair",
+    "Greycrystal",
+    "Westerburn",
+    "Morton",
+    "Icewynne",
+    "Merrowshore",
+    "Barrowcastle",
+    "Normill",
+    "Aelwick",
+    "Linbridge",
+    "Eastbell",
+    "Strongmoor",
+    "Griffinshore",
+    "Dorgate"
+};
+

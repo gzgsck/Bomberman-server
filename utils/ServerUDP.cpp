@@ -10,6 +10,7 @@
 #include "Serializer.h"
 #include "Deserializer.h"
 #include "Configuration.h"
+#include <chrono>
 
 
 void sendBombs(int socket, Map* map, sockaddr_in client);
@@ -20,6 +21,7 @@ void sendMapForAllPlayers(int socket, Map* map);
 void sendPong(int socket, sockaddr_in clientAddr, char buffer[]);
 void handleConnected(Connection* connection, int serverSocket, char message[], int messageLength);
 void handleNotConnected(int serverSocket, sockaddr_in clientAddr, char message[], int messageLength);
+void sendPendingMaps(int socket, sockaddr_in clientAddr);
 
 std::vector<Map*> pendingGames = {};
 std::vector<Map*> allGames = {};
@@ -160,7 +162,6 @@ int startServer() {
       exit(1);
     }
     
-    cout << "Server socket " << serverSocket << endl;
     while(1)
     {   
         char buffer[bufferSize];
@@ -170,32 +171,31 @@ int startServer() {
         int length = recvfrom(serverSocket, buffer, bufferSize, 0, (struct sockaddr*)&stClientAddr, &structureSize);
         
         if (length > 0) {
+
             if (buffer[0] == 'r' && buffer[1] == 't') {
                 char response[500];
                 lt->search(buffer, length, response, &stClientAddr);
                 int responseLength = strlen(response);
-                cout << "Retransmision request: " << responseLength << endl;
                 if (responseLength > 0) {
+                    cout << "Sending retransmission to " << buffer[2] << buffer[3] << endl ;
                     sendOnSocket(serverSocket, response, responseLength, 0, (struct sockaddr*)&stClientAddr, sizeof(stClientAddr));
                 } else {
-
                     Connection* incomming = existConnectionForAddress(&stClientAddr);
                     if (incomming != nullptr) {
-                        lowerSemaphore(connectionsSemaphore, 0, 500);
-                        handleConnected(incomming, serverSocket, buffer, length);
                         raiseSemaphore(connectionsSemaphore, 0, 500);
+                        handleConnected(incomming, serverSocket, buffer + 2, length);
+                        lowerSemaphore(connectionsSemaphore, 0, 500);
                     } else {
-                        handleNotConnected(serverSocket, stClientAddr, buffer, length);
+                        handleNotConnected(serverSocket, stClientAddr, buffer + 2, length);
                     }
                 }
             
             } else {
                 Connection* incomming = existConnectionForAddress(&stClientAddr);
-
                 if (incomming != nullptr) {
-                    lowerSemaphore(connectionsSemaphore, 0, 500);
-                    handleConnected(incomming, serverSocket, buffer, length);
                     raiseSemaphore(connectionsSemaphore, 0, 500);
+                    handleConnected(incomming, serverSocket, buffer, length);
+                    lowerSemaphore(connectionsSemaphore, 0, 500);
                 } else {
                     handleNotConnected(serverSocket, stClientAddr, buffer, length);
                 }
@@ -212,14 +212,23 @@ void getAcknownladge(int sequenceLength, int sequenceStart, char message[], char
 }
 
 void handleConnected(Connection* connection, int serverSocket, char message[], int messageLength) {
+    
     connection->setNowLastReceive();
     sockaddr_in clientAddr = connection->address;
-  
+    
     if (message[0] == 'p' && message[1] == 'i') {
         sendPong(serverSocket, connection->address, message);
+        return;
     }
+    cout << "Receiving " << message[0] << message[1] << " from connected user" << endl;
+
     if (message[0] == 'p' && message[1] == 'r') {
         probeRequest(serverSocket, connection, message, messageLength);
+        return;
+    }
+    if (message[0] == 'p' && message[1] == 'm') {
+        sendPendingMaps(serverSocket, connection->address);
+        return;
     }
 
     Map *map = connection->map;
@@ -231,6 +240,7 @@ void handleConnected(Connection* connection, int serverSocket, char message[], i
         } else {
             deserializeMove(message, map, player);
         }
+        return;
     }
     if (message[0] == 'b' && message[1] == 'm') {
         if (connection->map == nullptr || connection->player == nullptr) {
@@ -243,12 +253,15 @@ void handleConnected(Connection* connection, int serverSocket, char message[], i
 
             lt->add(message, messageLength, response, responseLength, &clientAddr);
             sendOnSocket(serverSocket, response, responseLength, 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
-
         }
+        return;
     }
 }
 
 void handleNotConnected(int serverSocket, sockaddr_in clientAddr, char message[], int messageLength) {
+    chrono::milliseconds ms = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch());
+
+
     if (message[0] == 'c' && message[1] == 'n') {
         connections.push_back(new Connection(&clientAddr));
         char response[500];
@@ -256,8 +269,8 @@ void handleNotConnected(int serverSocket, sockaddr_in clientAddr, char message[]
         int responseLength = strlen(response);
 
         lt->add(message, messageLength, response, responseLength, &clientAddr);
-
         sendOnSocket(serverSocket, response, responseLength, 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
+        
     } else {
         cout << "Reciving message different then connection request from not connected client" << endl; 
     }
@@ -285,6 +298,32 @@ void sendPlayers(int socket, Map* map, sockaddr_in clientAddr) {
     strcpy(buffer, o.c_str());
     sendOnSocket(socket, buffer, o.length(), 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
     return;
+}
+
+void sendPendingMaps(int socket, sockaddr_in clientAddr) {
+    string output = "pm|";
+    for (Map* map: pendingGames) {
+        int maxNumberOfPlayers = map->players.size();
+
+        int currentPlayers = 0;
+        for (Player* player: map->players) {
+            if (player->connection != nullptr) {
+                currentPlayers += 1;
+            }
+        }
+
+        output.append(to_string(map->id));
+        output.append(",");
+        output.append(map->name);
+        output.append(",");
+        output.append(to_string(currentPlayers));
+        output.append(",");
+        output.append(to_string(maxNumberOfPlayers));
+        output.append("|");
+    }
+    char response[output.length()];
+    strcpy(response, output.c_str());
+    sendOnSocket(socket, response, output.length(), 0, (struct sockaddr*)&clientAddr, sizeof(clientAddr));
 }
 
 bool createGame(Connection* connection, string name) {
@@ -340,7 +379,7 @@ void probeRequest(int socket, Connection* connection, char message[], int messag
         bool success = createGame(connection, name);
         if (success) {
             char response[500];
-            getAcknownladge(20, 2, message, response);  
+            getAcknownladge(20, size, message, response);  
             int responseLength = strlen(response);
 
             lt->add(message, messageLength, response, responseLength, &client);
@@ -353,7 +392,7 @@ void probeRequest(int socket, Connection* connection, char message[], int messag
         bool success = joinGame(connection, name, id);
         if (success) {
             char response[500];
-            getAcknownladge(20, 2, message, response);
+            getAcknownladge(20, size, message, response);
             int responseLength = strlen(response);
 
             lt->add(message, messageLength, response, responseLength, &client);
@@ -367,8 +406,7 @@ void probeRequest(int socket, Connection* connection, char message[], int messag
 }
 
 void sendPong(int socket, sockaddr_in clientAddr, char buffer[]) {
-    cout << " Address: " << inet_ntoa(clientAddr.sin_addr) << " port: " << clientAddr.sin_port;
-    sendOnSocket(socket, buffer, strlen(buffer), 0, (struct sockaddr *) &clientAddr, sizeof(clientAddr));
+        sendOnSocket(socket, buffer, strlen(buffer), 0, (struct sockaddr *) &clientAddr, sizeof(clientAddr));
     return;
 }
 
