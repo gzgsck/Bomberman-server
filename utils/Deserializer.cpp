@@ -22,15 +22,21 @@ int deserializeMapId(char message[]) {
 }
 
 void deserializeMove(char buffer[], Map* map, Player* player) {
-    string bombs;
-    bombs = std::string(buffer, 10);
-    char tab[4];
-    char tab2[4];
-    strncpy(tab, buffer + 2, 4);
-    int *x = (int *) tab;
-    strncpy(tab2, buffer + 6, 4);
-    int *y = (int *) tab2;
-    map->setPlayerMove(player, *x, *y);
+    int x = 0;
+    int y = 0;
+    if(buffer[0] == 'w'){
+        y = -STEP_SIZE;
+    }
+    if(buffer[0] == 's'){
+        y = STEP_SIZE;
+    }
+    if(buffer[0] == 'a'){
+        x = -STEP_SIZE;
+    }
+    if(buffer[0] == 'd'){
+        x = STEP_SIZE;
+    }
+    map->setPlayerMove(player, x, y);
 }
 
 void deserializeBomb(char buffer[], Map* map, Player* player) {

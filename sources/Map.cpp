@@ -57,13 +57,13 @@ int Map::addPlayersNameToList(string name) {
 }
 
 void Map::setPlayerMove(Player* player, int x, int y) {
-    player->resetPosition = !this->canMoveTo(player, x, y);
+    player->resetPosition = !this->canMoveTo(player, player->position->x + x, player->position->y + y);
 
     if (player->resetPosition) {
         return;
     }
 
-    Cell* cell = getCellByPosition(x/MAP_FIELD_SIZE, y/MAP_FIELD_SIZE);
+    Cell* cell = getCellByPosition((player->position->x + x)/MAP_FIELD_SIZE, (player->position->y + y)/MAP_FIELD_SIZE);
     if (cell->fire != nullptr) {
         if (!player->isProtected) {
             player->lifes -= 1;
@@ -75,8 +75,8 @@ void Map::setPlayerMove(Player* player, int x, int y) {
         }
     }
 
-    player->position->y = y;
-    player->position->x = x;
+    player->position->y += y;
+    player->position->x += x;
 }
 
 bool Map::canMoveTo(Player* player, int x , int y) {
