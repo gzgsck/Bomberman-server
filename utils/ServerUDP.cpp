@@ -70,13 +70,15 @@ void* singleGameRoutine(void* param) {
     long last = 0;
     
     while(true) {
-        usleep(30000);
+        usleep(20000);
         if (map->messageReceived == 1) {
+            cout << "Lower receive" << endl;
             lowerSemaphore(map->receive, 0, 1);
-
+            cout << "Pass receive" << endl;
         }
         semctl(map->receive, 0, SETVAL, (int)0);
-
+        
+        cout << "child Lower access" << endl;
         lowerSemaphore(map->access, 0, 1);
         long now = chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
@@ -152,9 +154,14 @@ void* singleGameRoutine(void* param) {
             }
             last = now;
         }
+
+        cout << "child Raise access" << endl;
         raiseSemaphore(map->access, 0, 1);
     }
-    
+
+    pendingGames.erase(std::remove(pendingGames.begin(), pendingGames.end(), map), pendingGames.end());
+    allGames.erase(std::remove(allGames.begin(), allGames.end(), map), allGames.end());
+    delete map;
     raiseSemaphore(map->access, 0, 1);
 }
 
@@ -287,6 +294,7 @@ void handleConnected(Connection* connection, int serverSocket, char message[], i
    
     if (message[0] == 'm' && message[1] == 'v') {
         map->messageReceived = 1;
+        cout << "Lower main" << endl;
         lowerSemaphore(map->access, 0, 1);
 
         if (connection->map == nullptr || connection->player == nullptr) {
@@ -295,13 +303,17 @@ void handleConnected(Connection* connection, int serverSocket, char message[], i
             deserializeMove(message, map, player);
         }
         
+
+
+        cout << "Raise main" << endl;
         raiseSemaphore(map->access, 0, 1);
         raiseSemaphore(map->receive, 0, 1);
         map->messageReceived = 0;
         return;
     }
     if (message[0] == 'b' && message[1] == 'm') {
-        map->messageReceived = 1;
+                map->messageReceived = 1;
+        cout << "Lower main" << endl;
         lowerSemaphore(map->access, 0, 1);
         
         if (connection->map == nullptr || connection->player == nullptr) {
@@ -316,6 +328,9 @@ void handleConnected(Connection* connection, int serverSocket, char message[], i
             sendOnSocket(serverSocket, response, responseLength, 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
         }
 
+
+
+        cout << "Raise main" << endl;
         raiseSemaphore(map->access, 0, 1);
         raiseSemaphore(map->receive, 0, 1);
         map->messageReceived = 0;
@@ -414,6 +429,7 @@ bool joinGame(Connection* connection, string name, int id) {
     Map* map = findGameById(id);
     if (map == nullptr) return false;
     map->messageReceived = 1;
+    cout << "Lower main" << endl;
     lowerSemaphore(map->access, 0, 1);
     if (map->checkIsOnPlayersList(name) != -1) return false;
     int playerId = map->addPlayersNameToList(name);
@@ -425,7 +441,9 @@ bool joinGame(Connection* connection, string name, int id) {
     if (map->checkAllPlayersHaveName()) {
         map->status = "inprogress";
         pendingGames.erase(std::remove(pendingGames.begin(), pendingGames.end(), map), pendingGames.end());
+    
     }
+    cout << "Raise main" << endl;
     raiseSemaphore(map->access, 0, 1);
     map->messageReceived = 0;
     raiseSemaphore(map->receive, 0, 1);

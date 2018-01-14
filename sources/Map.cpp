@@ -64,6 +64,7 @@ int Map::addPlayersNameToList(string name) {
 }
 
 void Map::setPlayerMove(Player* player, int x, int y) {
+    if (player->position->y + y < 0 || player->position->x + x < 0) return;
     if (!this->canMoveTo(player, player->position->x + x, player->position->y + y)) {
         return;
     }
@@ -125,6 +126,7 @@ bool Map::canPlantBomb(Player* player, Cell* cell){
 }
 
 Cell* Map::getCellByPosition(int x, int y) {
+    cout << x << " " << y << endl;
     if (x < 0 || y < 0 || x > MAP_SIZE - 1 || y > MAP_SIZE - 1) return nullptr;
     return this-> cells[y][x];
 }
