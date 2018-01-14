@@ -33,6 +33,8 @@ public:
     bool resetPosition;
     long protectionStartTime;
     bool isProtected;
+    char direction = 'u';
+    bool disconnected = false;
     Player();
 
     vector<Bomb*> bombs;

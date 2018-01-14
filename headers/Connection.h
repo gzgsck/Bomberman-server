@@ -26,7 +26,7 @@ class Connection {
     sockaddr_in address;
     Player* player;
     Map* map;
-    int lastReceiveTime;
+    long lastReceiveTime;
     Connection(sockaddr_in* address);
     void setNowLastReceive();
 };

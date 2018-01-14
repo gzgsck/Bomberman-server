@@ -18,11 +18,18 @@ Map::Map() {
     this->name = NAMES[i];
     NAMES[i] = "";
 
-    this->semaphore = semget(IPC_PRIVATE, 1, IPC_CREAT|0600);
-    if (semctl(semaphore, 0, SETVAL, (int)1) == -1) {
+    this->access = semget(IPC_PRIVATE, 1, IPC_CREAT|0600);
+    if (semctl(access, 0, SETVAL, (int)1) == -1) {
       perror("Nadanie wartosci semaforowi Map");
       exit(1);
     }
+    this->receive = semget(IPC_PRIVATE, 1, IPC_CREAT|0600);
+    if (semctl(receive, 0, SETVAL, (int)0) == -1) {
+      perror("Nadanie wartosci semaforowi Map");
+      exit(1);
+    }
+
+    this->messageReceived = 0;
 }
 
 
@@ -57,9 +64,7 @@ int Map::addPlayersNameToList(string name) {
 }
 
 void Map::setPlayerMove(Player* player, int x, int y) {
-    player->resetPosition = !this->canMoveTo(player, player->position->x + x, player->position->y + y);
-
-    if (player->resetPosition) {
+    if (!this->canMoveTo(player, player->position->x + x, player->position->y + y)) {
         return;
     }
 
@@ -81,6 +86,9 @@ void Map::setPlayerMove(Player* player, int x, int y) {
 
 bool Map::canMoveTo(Player* player, int x , int y) {
     Cell* cell = getCellByPosition(x/MAP_FIELD_SIZE, y/MAP_FIELD_SIZE);
+    if (cell == nullptr) {
+        return false;
+    }
     if (player->position->x/MAP_FIELD_SIZE == x/MAP_FIELD_SIZE && player->position->y/MAP_FIELD_SIZE == y/MAP_FIELD_SIZE){
        return true;
     }
@@ -117,6 +125,7 @@ bool Map::canPlantBomb(Player* player, Cell* cell){
 }
 
 Cell* Map::getCellByPosition(int x, int y) {
+    if (x < 0 || y < 0 || x > MAP_SIZE - 1 || y > MAP_SIZE - 1) return nullptr;
     return this-> cells[y][x];
 }
 

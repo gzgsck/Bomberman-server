@@ -22,21 +22,7 @@ int deserializeMapId(char message[]) {
 }
 
 void deserializeMove(char buffer[], Map* map, Player* player) {
-    int x = 0;
-    int y = 0;
-    if(buffer[0] == 'w'){
-        y = -STEP_SIZE;
-    }
-    if(buffer[0] == 's'){
-        y = STEP_SIZE;
-    }
-    if(buffer[0] == 'a'){
-        x = -STEP_SIZE;
-    }
-    if(buffer[0] == 'd'){
-        x = STEP_SIZE;
-    }
-    map->setPlayerMove(player, x, y);
+    player->direction = buffer[2];
 }
 
 void deserializeBomb(char buffer[], Map* map, Player* player) {

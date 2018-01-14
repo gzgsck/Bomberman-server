@@ -5,9 +5,25 @@
 #include <chrono>
 #include "GameJudge.h"
 
-void managePlayers(Map* map){
-    for(int i = 0 ; i < map->players.size(); i++){
-        map->players.at(i)->checkProtection();
+void managePlayers(Map* map, long timediff) {
+    for (int i = 0 ; i < map->players.size(); i++) {
+        Player* player = map->players.at(i);
+        player->checkProtection();
+        int x = 0;
+        int y = 0;
+        if(player->direction == 'w'){
+            y = -STEP_SIZE*timediff/1000;
+        }
+        if(player->direction == 's'){
+            y = STEP_SIZE*timediff/1000;
+        }
+        if(player->direction == 'a'){
+            x = -STEP_SIZE*timediff/1000;
+        }
+        if(player->direction == 'd'){
+            x = STEP_SIZE*timediff/1000;
+        }
+        map->setPlayerMove(player, x, y);
     }
 }
 

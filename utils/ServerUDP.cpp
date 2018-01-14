@@ -27,7 +27,6 @@ std::vector<Map*> pendingGames = {};
 std::vector<Map*> allGames = {};
 
 pthread_mutex_t socketMutex = PTHREAD_MUTEX_INITIALIZER;
-int connectionsSemaphore;
 std::vector<Connection*> connections = {};
 int serverSocket;
 
@@ -68,21 +67,58 @@ ssize_t sendOnSocket(int sockfd, const void *buf, size_t len, int flags, const s
 
 void* singleGameRoutine(void* param) {
     Map *map = (Map*) param;
+    long last = 0;
+    
     while(true) {
-        usleep(200000);
-        cout << "singleGameRoutine " << map->id << " starts" << endl;
-        lowerSemaphore(map->semaphore, 0, 1);
-        lowerSemaphore(connectionsSemaphore, 0, 1);
+        usleep(30000);
+        if (map->messageReceived == 1) {
+            lowerSemaphore(map->receive, 0, 1);
 
-        manageBombsExplosions(map);
-        manageFires(map);
-        managePlayers(map);
+        }
+        semctl(map->receive, 0, SETVAL, (int)0);
 
-        
+        lowerSemaphore(map->access, 0, 1);
+        long now = chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+      
+
+        if (map->status.compare("pending") == 0) {
+            if (map->players.at(0)->disconnected) {
+                map->status = "aborted";
+                break;
+            }
+            for (int i = 1; i < map->players.size(); i++) {
+                Player* player = map->players.at(i);
+                if (player->disconnected) {
+                    player->name = "";
+                    player->disconnected = false;
+                }
+            }
+        } else if (map->status.compare("inprogress") == 0) {
+            int connected = 0;
+            for (int i = 0; i < map->players.size(); i++) {
+                Player* player = map->players.at(i);
+                if (player->disconnected) {
+                    player->lifes = 0;
+                    player->isAlive = false;
+                } else {
+                    connected++;
+                }
+            }
+            if (connected == 0) {
+                map->status = "aborted";
+                break;
+            }
+        }
+
+        int gameStatus = map->status.compare("inprogress") == 0 ? 0 : -1;
+        if (map->status.compare("aborted") == 0) {
+            gameStatus = 7;
+        }
+ 
         for (int i = 0; i < map->players.size(); i++) {
             Player* player = map->players.at(i);
-            if (player->name.size() > 0) {
-                int gameStatus =  map->checkAllPlayersHaveName() ? 0 : -1;
+            if (player->connection != nullptr) {
                 
                 struct sockaddr_in* address = (struct sockaddr_in*)&(player->connection->address);
                 socklen_t len = sizeof(sockaddr);
@@ -98,19 +134,28 @@ void* singleGameRoutine(void* param) {
         }
 
         if (map->status.compare("inprogress") == 0) {
-            cout << map->status << endl;
-            for (int i = 0; i < map->players.size(); i++) {
-                sendPlayers(serverSocket, map, map->players.at(i)->connection->address);
-                sendObstacles(serverSocket, map, map->players.at(i)->connection->address);
-                sendBombs(serverSocket, map, map->players.at(i)->connection->address);
+            
+            if (last == 0) {
+                last = now;
             }
-        }
-        
-        raiseSemaphore(connectionsSemaphore, 0, 1);
-        raiseSemaphore(map->semaphore, 0, 1);
-        cout << "singleGameRoutine " << map->id << " ends" << endl;
+            manageBombsExplosions(map);
+            manageFires(map);
+            managePlayers(map, now - last);
 
+            for (int i = 0; i < map->players.size(); i++) {
+                Player* player = map->players.at(i);
+                if (player->connection != nullptr) {
+                    sendPlayers(serverSocket, map, player->connection->address);
+                    sendObstacles(serverSocket, map, player->connection->address);
+                    sendBombs(serverSocket, map, player->connection->address);
+                }
+            }
+            last = now;
+        }
+        raiseSemaphore(map->access, 0, 1);
     }
+    
+    raiseSemaphore(map->access, 0, 1);
 }
 
 int idSequence = 0;
@@ -156,17 +201,28 @@ int startServer() {
     socklen_t structureSize = sizeof(struct sockaddr);
     int bufferSize = 500;
 
-    connectionsSemaphore = semget(IPC_PRIVATE, 1, IPC_CREAT|0600);
-    if (semctl(connectionsSemaphore, 0, SETVAL, (int)500) == -1) {
-      perror("Nadanie wartosci semaforowi conneciton list");
-      exit(1);
-    }
-    
     while(1)
     {   
         char buffer[bufferSize];
 
         lt->removeOutdated();
+        std::vector<Connection*> newConnections = {};
+
+        copy_if(connections.begin(), connections.end(), std::back_inserter(newConnections), [](Connection* connection) {
+            long now = chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            bool disconnected = (now - connection->lastReceiveTime) > 5000;
+            if (disconnected) {
+                cout << "Disconnected" << endl; 
+                if (connection->player != nullptr) {
+                    connection->player->setConnection(nullptr);
+                    connection->player->disconnected = true;
+                }
+                delete connection;
+                return false;
+            } 
+            return true;
+        });
+        connections = newConnections;
 
         int length = recvfrom(serverSocket, buffer, bufferSize, 0, (struct sockaddr*)&stClientAddr, &structureSize);
         
@@ -182,9 +238,7 @@ int startServer() {
                 } else {
                     Connection* incomming = existConnectionForAddress(&stClientAddr);
                     if (incomming != nullptr) {
-                        raiseSemaphore(connectionsSemaphore, 0, 500);
                         handleConnected(incomming, serverSocket, buffer + 2, length);
-                        lowerSemaphore(connectionsSemaphore, 0, 500);
                     } else {
                         handleNotConnected(serverSocket, stClientAddr, buffer + 2, length);
                     }
@@ -193,9 +247,7 @@ int startServer() {
             } else {
                 Connection* incomming = existConnectionForAddress(&stClientAddr);
                 if (incomming != nullptr) {
-                    raiseSemaphore(connectionsSemaphore, 0, 500);
                     handleConnected(incomming, serverSocket, buffer, length);
-                    lowerSemaphore(connectionsSemaphore, 0, 500);
                 } else {
                     handleNotConnected(serverSocket, stClientAddr, buffer, length);
                 }
@@ -220,7 +272,6 @@ void handleConnected(Connection* connection, int serverSocket, char message[], i
         sendPong(serverSocket, connection->address, message);
         return;
     }
-    cout << "Receiving " << message[0] << message[1] << " from connected user" << endl;
 
     if (message[0] == 'p' && message[1] == 'r') {
         probeRequest(serverSocket, connection, message, messageLength);
@@ -233,16 +284,26 @@ void handleConnected(Connection* connection, int serverSocket, char message[], i
 
     Map *map = connection->map;
     Player *player = connection->player;
-
+   
     if (message[0] == 'm' && message[1] == 'v') {
+        map->messageReceived = 1;
+        lowerSemaphore(map->access, 0, 1);
+
         if (connection->map == nullptr || connection->player == nullptr) {
             cout << "Receiving bomb request but not active game for connection" << endl;
         } else {
             deserializeMove(message, map, player);
         }
+        
+        raiseSemaphore(map->access, 0, 1);
+        raiseSemaphore(map->receive, 0, 1);
+        map->messageReceived = 0;
         return;
     }
     if (message[0] == 'b' && message[1] == 'm') {
+        map->messageReceived = 1;
+        lowerSemaphore(map->access, 0, 1);
+        
         if (connection->map == nullptr || connection->player == nullptr) {
             cout << "Receiving move request but not active game for connection" << endl;
         } else {
@@ -254,14 +315,16 @@ void handleConnected(Connection* connection, int serverSocket, char message[], i
             lt->add(message, messageLength, response, responseLength, &clientAddr);
             sendOnSocket(serverSocket, response, responseLength, 0,(struct sockaddr*)&clientAddr, sizeof(clientAddr));
         }
+
+        raiseSemaphore(map->access, 0, 1);
+        raiseSemaphore(map->receive, 0, 1);
+        map->messageReceived = 0;
         return;
     }
+
 }
 
 void handleNotConnected(int serverSocket, sockaddr_in clientAddr, char message[], int messageLength) {
-    chrono::milliseconds ms = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch());
-
-
     if (message[0] == 'c' && message[1] == 'n') {
         connections.push_back(new Connection(&clientAddr));
         char response[500];
@@ -350,7 +413,8 @@ bool joinGame(Connection* connection, string name, int id) {
 
     Map* map = findGameById(id);
     if (map == nullptr) return false;
-    lowerSemaphore(map->semaphore, 0, 1);
+    map->messageReceived = 1;
+    lowerSemaphore(map->access, 0, 1);
     if (map->checkIsOnPlayersList(name) != -1) return false;
     int playerId = map->addPlayersNameToList(name);
 
@@ -362,7 +426,9 @@ bool joinGame(Connection* connection, string name, int id) {
         map->status = "inprogress";
         pendingGames.erase(std::remove(pendingGames.begin(), pendingGames.end(), map), pendingGames.end());
     }
-    raiseSemaphore(map->semaphore, 0, 1);
+    raiseSemaphore(map->access, 0, 1);
+    map->messageReceived = 0;
+    raiseSemaphore(map->receive, 0, 1);
     return true;
 
 }

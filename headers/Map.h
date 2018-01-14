@@ -2,6 +2,7 @@
 #define PROJECTBOOM_MAP_H
 #include <iostream>
 #include <vector>
+#include <atomic>
 #include <stdlib.h>
 #include "Player.h"
 #include "Obstacle.h"
@@ -28,7 +29,9 @@ public:
     Map();
     int id;
     string name;
-    int semaphore;
+    int access;
+    int receive;
+    std::atomic_int messageReceived;
     string status;
     vector<Player*> players;
     Cell* cells[MAP_SIZE][MAP_SIZE];
